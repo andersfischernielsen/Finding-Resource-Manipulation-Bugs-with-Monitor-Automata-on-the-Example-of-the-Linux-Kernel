@@ -1,0 +1,43 @@
+% !TeX root = report.tex
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage[english]{babel}
+\usepackage{babelbib}
+\usepackage{cite}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage[plainpages=false,pdfpagelabels,hidelinks]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{import}
+\usepackage{multicol}
+\usepackage{pdfpages}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{tocbibind}
+\usepackage{imakeidx}
+\usepackage[totoc]{idxlayout}
+\usepackage{minted}
+
+\pdfsuppresswarningpagegroup=1
+
+\newtheorem{definition}{Definition}
+
+\newcommand{\newpar}{\bigskip\noindent}
+
+\newcommand{\algorithmautorefname}{algorithm}
+\newcommand{\definitionautorefname}{definition}
+\newcommand{\invariantautorefname}{invariant}
+
+\addto\extrasenglish{%
+  \renewcommand{\subsectionautorefname}{section}%
+  \renewcommand{\subsubsectionautorefname}{section}%
+    \renewcommand{\figureautorefname}{figure}%
+}
+
+\MakeRobust{\Call}
+
+\floatstyle{plain}
+\newfloat{invariant}{tbph!}{inv}
+\floatname{invariant}{Invariant}

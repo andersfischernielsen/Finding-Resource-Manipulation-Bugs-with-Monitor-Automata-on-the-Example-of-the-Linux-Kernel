@@ -1,0 +1,9 @@
+\section{Introduction}
+
+\newpar The Linux kernel supports a vast array of computer architectures and runs on a multitude of devices from embedded devices, through personal computers to large servers; on wireless
+access points, smart TVs, smartphones, refrigerators.
+Errors in the Linux kernel therefore affect a multitude of devices and can therefore have a potential significant negative impact.
+
+\newpar An important aspect of kernel programming is management and manipulation of resources, be it devices, file handles, memory blocks, and locks. Shared-memory concurrency and locks are used extensively in the C source code of the Linux kernel in order to allow parallelization of subsystems within the kernel while at the same time avoiding race conditions. Static analysers allow detection of errors in the C source code of the Linux kernel by reasoning about this resource manipulation. A control flow graph can be found for the components of the kernel, which can then in turn be statically analysed to detect possible ressource manipulation errors.
+
+\cite{unlockPOSIX}

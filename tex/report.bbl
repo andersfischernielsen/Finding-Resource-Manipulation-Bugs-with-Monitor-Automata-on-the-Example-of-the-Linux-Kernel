@@ -1,0 +1,9 @@
+\begin{thebibliography}{1}
+
+\bibitem{unlockPOSIX}
+IEEE and The~Open Group.
+\newblock pthread\_spin\_unlock - unlock a spin lock object.
+\newblock \url{https://pubs.opengroup.org/onlinepubs/9699919799/}, 2017.
+\newblock Accessed: 2019-11-25.
+
+\end{thebibliography}
