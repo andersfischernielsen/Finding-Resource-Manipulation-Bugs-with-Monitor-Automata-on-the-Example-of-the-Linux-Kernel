@@ -1,5 +1,11 @@
 \begin{thebibliography}{1}
 
+\bibitem{EffectiveBugFinding}
+Iago Abal, Claus Brabrand, and Andrzej Wasowski.
+\newblock Effective bug finding in c programs with shape and effect
+  abstractions.
+\newblock pages 34--54, 01 2017.
+
 \bibitem{unlockPOSIX}
 IEEE and The~Open Group.
 \newblock pthread\_spin\_unlock - unlock a spin lock object.

@@ -3,9 +3,12 @@
 \contentsline {section}{Contents}{2}{section*.1}% 
 \contentsline {section}{\numberline {1}Introduction}{3}{section.1}% 
 \contentsline {section}{\numberline {2}Background}{3}{section.2}% 
-\contentsline {section}{\numberline {3}Finding Double-Unlock Bugs}{3}{section.3}% 
-\contentsline {section}{\numberline {4}Results}{3}{section.4}% 
-\contentsline {section}{\numberline {5}Future Work}{3}{section.5}% 
-\contentsline {section}{\numberline {6}Conclusion}{3}{section.6}% 
-\contentsline {section}{References}{4}{section*.2}% 
-\contentsline {section}{\numberline {7}Appendix}{5}{section.7}% 
+\contentsline {subsection}{\numberline {2.1}Double-unlock monitor automata}{3}{subsection.2.1}% 
+\contentsline {section}{\numberline {3}Finding Double-Unlock Bugs}{4}{section.3}% 
+\contentsline {subsection}{\numberline {3.1}EBA Integration}{4}{subsection.3.1}% 
+\contentsline {subsection}{\numberline {3.2}Automata Signatures}{5}{subsection.3.2}% 
+\contentsline {section}{\numberline {4}Results}{5}{section.4}% 
+\contentsline {section}{\numberline {5}Future Work}{5}{section.5}% 
+\contentsline {section}{\numberline {6}Conclusion}{5}{section.6}% 
+\contentsline {section}{References}{6}{section*.5}% 
+\contentsline {section}{\numberline {7}Appendix}{7}{section.7}% 

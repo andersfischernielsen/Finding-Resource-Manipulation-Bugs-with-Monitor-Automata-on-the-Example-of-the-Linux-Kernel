@@ -1,2 +1,22 @@
 \section{Finding Double-Unlock Bugs}
 
+\subsection{EBA Integration}
+The EBA framework allows specifying checker signatures whose implementations are executed on a given input source file. Checker signature implementations instantiate a given bug checker for a given bug type and the internal logic of the bug checker is run by the framework. 
+
+\newpar A signature for a checker which allows instantiation of monitor automata bug checkers has been defined as part of my work. The function, \texttt{check}, is the only requirement for implementing this signature. This function takes two parameters and returns a list of strings for each detected possible bug in the input source file. These two parameters are an abstraction of the input file and each global function defined in this file. This signature mimics the existing CTL checkers in EBA and allows for easy integration into the framework. 
+
+\newpar This signature is implemented as a module, \texttt{Make}, which is used by EBA in order to run automata bug checkers. The \texttt{Make} module expects an implementation of the \texttt{AutomataSpec} signature which defines a monitor automata, detailed in the following section. 
+
+\newpar The Make module explores the CFG tree structure and applies a transition function defined in the monitor automata signature. Depending on the type of the given tree node different actions are executed and the tree is then explored further until the end of each path in the tree is explored. 
+
+\todo[inline]{Describe PathTree tree structure in detail}
+
+\newpar If-statements in the source input result in an If-node in the tree. If such a node is discovered the two branches from that node are explored and the union of the resulting states is found. \todo{Describe Assume nodes}
+
+All other nodes than the ones described are modelled as Seq nodes. These Seq nodes then contain a step which models an execution step in the input source code. When a Seq is discovered in the tree, the given effects of its containing step are explored. These effect raise a problem; since a given step contains a set of effects, the order of these effects are therefore not known and all orders of executing these effects need to be explored. All permutations of the set of effects need to be found and mapped to the given region, while also preserving the information of the other permutations for that given region. Furthermore, the transition function of the monitor automata needs to be evaluated on the current input, resulting in a new state of that automata which must be stored for that region.  
+
+\newpar Implementing this evaluation using a mapping from a region to the monitor automata which is monitoring that given region is utilized to great effect solve the aforementioned problems and keep track of automata states for regions. This map is continuously updated when encountering previous and new regions with the new state of evaluating the transition function of a given automata with the current effects for a given execution step.
+
+\newpar When all paths \todo{traces?} in the CFG have been explored, the regions which map to error states along with their location and traces are extracted from the mapping and presented to the user as error messages. 
+
+\subsection{Automata Signatures}
