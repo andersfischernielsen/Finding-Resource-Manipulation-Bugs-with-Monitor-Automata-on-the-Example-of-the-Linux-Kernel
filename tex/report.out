@@ -1,12 +1,14 @@
 \BOOKMARK [1][-]{section*.1}{Contents}{}% 1
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 2
 \BOOKMARK [1][-]{section.2}{Background}{}% 3
-\BOOKMARK [2][-]{subsection.2.1}{Double-unlock monitor automata}{section.2}% 4
-\BOOKMARK [1][-]{section.3}{Finding Double-Unlock Bugs}{}% 5
-\BOOKMARK [2][-]{subsection.3.1}{EBA Integration}{section.3}% 6
-\BOOKMARK [2][-]{subsection.3.2}{Automata Signatures}{section.3}% 7
-\BOOKMARK [1][-]{section.4}{Results}{}% 8
-\BOOKMARK [1][-]{section.5}{Future Work}{}% 9
-\BOOKMARK [1][-]{section.6}{Conclusion}{}% 10
-\BOOKMARK [1][-]{section*.5}{References}{}% 11
-\BOOKMARK [1][-]{section.7}{Appendix}{}% 12
+\BOOKMARK [2][-]{subsection.2.1}{Control Flow}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.2}{Monitor Automata}{section.2}% 5
+\BOOKMARK [3][-]{subsubsection.2.2.1}{Double-unlock monitor automata}{subsection.2.2}% 6
+\BOOKMARK [1][-]{section.3}{Finding Double-Unlock Bugs}{}% 7
+\BOOKMARK [2][-]{subsection.3.1}{EBA Integration}{section.3}% 8
+\BOOKMARK [2][-]{subsection.3.2}{Automata Signatures}{section.3}% 9
+\BOOKMARK [1][-]{section.4}{Results}{}% 10
+\BOOKMARK [1][-]{section.5}{Future Work}{}% 11
+\BOOKMARK [1][-]{section.6}{Conclusion}{}% 12
+\BOOKMARK [1][-]{section*.5}{References}{}% 13
+\BOOKMARK [1][-]{section.7}{Appendix}{}% 14

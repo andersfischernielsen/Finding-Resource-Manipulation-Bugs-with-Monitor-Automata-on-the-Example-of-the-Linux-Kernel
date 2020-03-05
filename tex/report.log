@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.10.25)  4 MAR 2020 15:36
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.10.25)  5 MAR 2020 11:07
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
@@ -829,30 +829,30 @@ Package hyperref Info: Option `pageanchor' set `true' on input line 13.
  [2
 
 ] (./introduction/introduction.tex) (./background/background.tex
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 12.
+Package hyperref Info: bookmark level for unknown todo defaults to 0 on input line 3.
+ [3
+
+]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 66.
  (/usr/local/texlive/2019/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 12.
-<background/figures/double-unlock.pdf, id=108, 229.81859pt x 137.5539pt>
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 66.
+<background/figures/double-unlock.pdf, id=127, 229.81859pt x 137.5539pt>
 File: background/figures/double-unlock.pdf Graphic file (type pdf)
 <use background/figures/double-unlock.pdf>
-Package pdftex.def Info: background/figures/double-unlock.pdf  used on input line 24.
+Package pdftex.def Info: background/figures/double-unlock.pdf  used on input line 78.
 (pdftex.def)             Requested size: 209.12683pt x 125.17212pt.
- [3
-
-]) (./implementation/implementation.tex
-Package hyperref Info: bookmark level for unknown todo defaults to 0 on input line 12.
- [4 <./background/figures/double-unlock.pdf>]) (./evaluation/evaluation.tex) (./futurework/futurework.tex) (./conclusion/conclusion.tex) [5]
+ [4]) (./implementation/implementation.tex [5 <./background/figures/double-unlock.pdf>]) (./evaluation/evaluation.tex) (./futurework/futurework.tex) (./conclusion/conclusion.tex) [6]
 \openout2 = `bibliography.aux'.
 
- (./bibliography.tex (./report.bbl)) [6
+ (./bibliography.tex (./report.bbl)) [7
 
 ]
 \openout2 = `appendix/appendix.aux'.
 
- (./appendix/appendix.tex) [7
+ (./appendix/appendix.tex) [8
 
 
 ]
@@ -862,22 +862,22 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 24.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 24.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 24.
 Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: 382FD32B8178A287B9E3AC54E3DDF8E2;633.
+(rerunfilecheck)             Checksum: 43ED024D67671DFF2E63D6698C7BB81E;771.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 24.
  ) 
 Here is how much of TeX's memory you used:
- 22514 strings out of 492616
- 424125 string characters out of 6129480
- 568401 words of memory out of 5000000
- 25929 multiletter control sequences out of 15000+600000
- 9874 words of font info for 37 fonts, out of 8000000 for 9000
+ 22524 strings out of 492616
+ 424255 string characters out of 6129480
+ 570401 words of memory out of 5000000
+ 25934 multiletter control sequences out of 15000+600000
+ 10918 words of font info for 40 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 64i,9n,81p,1237b,975s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on report.pdf (7 pages, 184294 bytes).
+ 64i,24n,81p,1273b,975s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on report.pdf (8 pages, 207096 bytes).
 PDF statistics:
- 201 PDF objects out of 1000 (max. 8388607)
- 159 compressed objects within 2 object streams
- 25 named destinations out of 1000 (max. 500000)
- 210 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 219 PDF objects out of 1000 (max. 8388607)
+ 175 compressed objects within 2 object streams
+ 28 named destinations out of 1000 (max. 500000)
+ 226 words of extra memory for PDF output out of 10000 (max. 10000000)
 
