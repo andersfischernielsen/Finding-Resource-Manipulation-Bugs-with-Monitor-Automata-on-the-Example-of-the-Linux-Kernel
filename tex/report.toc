@@ -6,11 +6,14 @@
 \contentsline {subsection}{\numberline {2.1}Control Flow}{3}{subsection.2.1}% 
 \contentsline {subsection}{\numberline {2.2}Monitor Automata}{4}{subsection.2.2}% 
 \contentsline {subsubsection}{\numberline {2.2.1}Double-unlock monitor automata}{4}{subsubsection.2.2.1}% 
-\contentsline {section}{\numberline {3}Finding Double-Unlock Bugs}{5}{section.3}% 
-\contentsline {subsection}{\numberline {3.1}EBA Integration}{5}{subsection.3.1}% 
-\contentsline {subsection}{\numberline {3.2}Automata Signatures}{6}{subsection.3.2}% 
-\contentsline {section}{\numberline {4}Results}{6}{section.4}% 
-\contentsline {section}{\numberline {5}Future Work}{6}{section.5}% 
-\contentsline {section}{\numberline {6}Conclusion}{6}{section.6}% 
-\contentsline {section}{References}{7}{section*.5}% 
-\contentsline {section}{\numberline {7}Appendix}{8}{section.7}% 
+\contentsline {subsubsection}{\numberline {2.2.2}Double-lock monitor automata}{5}{subsubsection.2.2.2}% 
+\contentsline {subsubsection}{\numberline {2.2.3}Double-free monitor automata}{5}{subsubsection.2.2.3}% 
+\contentsline {subsubsection}{\numberline {2.2.4}Use-before-init monitor automata}{6}{subsubsection.2.2.4}% 
+\contentsline {section}{\numberline {3}Finding Double-Unlock Bugs}{7}{section.3}% 
+\contentsline {subsection}{\numberline {3.1}EBA Integration}{7}{subsection.3.1}% 
+\contentsline {subsection}{\numberline {3.2}Automata Signatures}{8}{subsection.3.2}% 
+\contentsline {section}{\numberline {4}Results}{8}{section.4}% 
+\contentsline {section}{\numberline {5}Future Work}{8}{section.5}% 
+\contentsline {section}{\numberline {6}Conclusion}{8}{section.6}% 
+\contentsline {section}{References}{9}{section*.4}% 
+\contentsline {section}{\numberline {7}Appendix}{10}{section.7}% 

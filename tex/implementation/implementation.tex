@@ -9,7 +9,7 @@ The EBA framework allows specifying checker signatures whose implementations are
 
 \newpar The Make module explores the CFG tree structure and applies a transition function defined in the monitor automata signature. Depending on the type of the given tree node different actions are executed and the tree is then explored further until the end of each path in the tree is explored. 
 
-\newpar If-statements in the source input result in an If-node in the tree. If such a node is discovered the two branches from that node are explored and the union of the resulting states is found. \todo{Describe Assume nodes}
+\newpar If-statements in the source input result in an If-node in the tree. If such a node is discovered the two branches from that node are explored and the union of the resulting states is found.
 
 \newpar All other nodes than the ones described are modelled as Seq nodes. These Seq nodes then contain a step which models an execution step in the input source code. When a Seq is discovered in the tree, the given effects of its containing step are explored. These effect raise a problem; since a given step contains a set of effects, the order of these effects are therefore not known and all orders of executing these effects need to be explored. All permutations of the set of effects need to be found and mapped to the given region, while also preserving the information of the other permutations for that given region. Furthermore, the transition function of the monitor automata needs to be evaluated on the current input, resulting in a new state of that automata which must be stored for that region.  
 

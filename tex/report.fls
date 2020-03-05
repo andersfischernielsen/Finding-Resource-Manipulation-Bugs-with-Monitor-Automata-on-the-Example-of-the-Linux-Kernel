@@ -320,6 +320,15 @@ INPUT /usr/local/texlive/2019/texmf-dist/fonts/tfm/public/cm/cmtt8.tfm
 INPUT background/figures/double-unlock.pdf
 INPUT ./background/figures/double-unlock.pdf
 INPUT ./background/figures/double-unlock.pdf
+INPUT background/figures/double-lock.pdf
+INPUT ./background/figures/double-lock.pdf
+INPUT ./background/figures/double-lock.pdf
+INPUT background/figures/double-free.pdf
+INPUT ./background/figures/double-free.pdf
+INPUT ./background/figures/double-free.pdf
+INPUT background/figures/use-before.pdf
+INPUT ./background/figures/use-before.pdf
+INPUT ./background/figures/use-before.pdf
 INPUT implementation/implementation.tex
 INPUT implementation/implementation.tex
 INPUT evaluation/evaluation.tex

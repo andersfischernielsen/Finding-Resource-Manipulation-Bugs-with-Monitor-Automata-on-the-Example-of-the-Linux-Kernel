@@ -49,7 +49,7 @@ EBA provides a representation of the control flow of the input source files whic
     \end{split}
 \end{equation*}
 
-\newpar A control flow defining effects of statements can therefore be defined as a finite state machine $(\sum, S, s_0, \delta, F)$ as follows where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. 
+\newpar A control flow defining effects of statements can be defined as a finite state machine $(\sum, S, s_0, \delta, F)$ as follows where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. 
 
 \subsection{Monitor Automata}
 Monitor automata are defined as the quintuple $(\sum, S, s_0, \delta, F)$ where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$.
@@ -80,3 +80,68 @@ An illustration of this monitor automata can be seen in figure \ref{double-unloc
     \label{double-unlock-automata}
 \end{figure}
     
+\subsubsection{Double-lock monitor automata}
+
+A double-lock monitor automata is defined as the quintuple $(\sum, S, s_0, \delta, F)$ where: 
+
+\begin{itemize}
+    \item $\sum = \{\texttt{lock}, \texttt{unlock}\}$, a subset of $E$
+    \item $S = \{ locked_\rho, unlocked_\rho, error_\rho \}$, bound to a region $\rho$
+    \item $s_0 = unlocked_\rho$ 
+    \item $\delta =$ the relation $\{(unlocked_\rho, \texttt{lock}_\rho, locked_\rho), (locked_\rho, \texttt{unlock}_\rho, unlocked_\rho), \\
+    (locked_\rho, \texttt{lock}_\rho, error_\rho), (unlocked_\rho, \texttt{unlock}_\rho, unlocked_\rho)\}$ 
+    \item $F = error_\rho$  
+\end{itemize}
+
+An illustration of this monitor automata can be seen in figure \ref{double-lock-automata}. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{background/figures/double-lock}
+    \caption{An illustration of a double-lock monitor automata.}
+    \label{double-lock-automata}
+\end{figure}
+
+\subsubsection{Double-free monitor automata}
+
+A double-free monitor automata is defined as the quintuple $(\sum, S, s_0, \delta, F)$ where: 
+
+\begin{itemize}
+    \item $\sum = \{\texttt{free}, \texttt{alloc}\}$, a subset of $E$
+    \item $S = \{ allocated_\rho, freed_\rho, error_\rho \}$, bound to a region $\rho$
+    \item $s_0 = freed_\rho$ 
+    \item $\delta =$ the relation $\{(freed_\rho, \texttt{alloc}_\rho, allocated_\rho), (allocated_\rho, \texttt{free}_\rho, freed_\rho), \\
+    (freed_\rho, \texttt{free}_\rho, error_\rho), (allocated_\rho, \texttt{alloc}_\rho, allocated_\rho)\}$ 
+    \item $F = error_\rho$  
+\end{itemize}
+
+An illustration of this monitor automata can be seen in figure \ref{double-free-automata}. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{background/figures/double-free}
+    \caption{An illustration of a double-free monitor automata.}
+    \label{double-free-automata}
+\end{figure}
+
+\subsubsection{Use-before-init monitor automata}
+
+A use-before-init monitor automata is defined as the quintuple $(\sum, S, s_0, \delta, F)$ where: 
+
+\begin{itemize}
+    \item $\sum = \{\texttt{read}, \texttt{init}\}$, a subset of $E$
+    \item $S = \{ unread_\rho, initialized_\rho, error_\rho \}$, bound to a region $\rho$
+    \item $s_0 = unused_\rho$ 
+    \item $\delta =$ the relation $\{(unread_\rho, \texttt{init}_\rho, initialized_\rho), (initialized_\rho, \texttt{uninit}_\rho, unread_\rho), \\
+    (unread_\rho, \texttt{read}_\rho, error_\rho), (initialized_\rho, \texttt{init}_\rho, initialized_\rho)\}$ 
+    \item $F = error_\rho$  
+\end{itemize}
+
+An illustration of this monitor automata can be seen in figure \ref{use-before-automata}. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{background/figures/use-before}
+    \caption{An illustration of a use-before-init monitor automata.}
+    \label{use-before-automata}
+\end{figure}
