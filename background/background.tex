@@ -4,55 +4,51 @@
 
 \subsection{Control Flow}
 
-EBA provides a representation of the control flow of the input source files which is utilized in order to detect bugs. EBA generates a tree structure of the input, modeling statements as so-called \texttt{step}s. A path in this tree structure models a possible execution path, with each \texttt{step} in a path containing information about the modelled statements. The tree structure consists of $t$ nodes, which can be formalized as follows.
+EBA provides a representation of the control flow of the input source files which is utilized in order to detect bugs. EBA generates a tree structure of the input, modeling statements as so-called \texttt{step}s. A path in this tree structure models a possible execution path, with each \texttt{step} in a path containing information about the modelled statements. The concrete tree structure modeling the resulting effects of statements can be formalized as a finite state machine $(\sum, S, s_0, \delta, F)$ as follows where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. 
 
-\begin{equation*} 
-    \begin{aligned}
-        t =\;& \mathit{Nil} \\
-        & \mathit{Assume} (cond, bool, t) \\
-        & \mathit{Seq} (step, t) \\
-        & \mathit{If} (t, t) \\
-    \end{aligned}
-\end{equation*}
+\begin{itemize}
+    \item{
+        $
+            \begin{aligned}[t] 
+                \sum = & \{\mathit{Seq}, \mathit{If\_true}(s), \mathit{If\_false}(s), Nil, (alloc, \rho), (free, \rho), (read, \rho), \\ & (write , \rho), (uninit, \rho), (call, \rho), (lock, \rho), (unlock, \rho)\}
+            \end{aligned} 
+        $
+    }
+    \item{
+        $
+            \begin{aligned}[t]
+                S = & \{(allocated, \rho), If_true, If_false, (freed, \rho), (read, \rho), (written , \rho),\\ & (uninitialized, \rho), (called, \rho), (locked, \rho), (unlocked, \rho), End\}
+            \end{aligned}
+        $
+    }
+\end{itemize}
 
-\noindent A few things are of note here; $Nil$ indicates the end of a path in the tree structure. $Assume$ is effectively ignored in my work, and is merely used in order to continue the exploration of the tree structure. $\mathit{If}$ indicates a branch in the input source file and models possible branches in if-statements. $Seq$ is the most interesting of $t$, since this type consists of the aforementioned $step$, providing access to information about the effects of a statement. It is also worth noting that all types provide the next $t$ in the current branch, allowing recursively exploring the tree until a $Nil$ is reached. 
+\noindent The initial state, $s_0$, is dependent on the control flow being modelled, and can therefore be any element of $\sum$. The same applies for the transition function $\delta$ and the set of final states $F$, which is also a subset of $\sum$. A concrete definition for an example control flow with an illustration of this in figure \ref{cfg_example-automaton} is shown below.
 
-\newpar $Step$s contain information about a statement in the input source file, such as the type of statement, location of the statement and the effects of  the statement. The latter of the three is relevant for this analysis, since we are interested in monitoring effects of statements using monitor automata. A step contains two internal sets, each modelling which effects EBA analyzes a step \textit{must} and \textit{may} have. Each set consists of the effect type $e$, formalized below. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\textwidth]{background/figures/cfg_example}
+    \caption{An illustration of a Control Flow automaton.}
+    \label{cfg_example-automaton}
+\end{figure}
 
-\newpar Effects which operate on memory regions are modelled as the $Mem$ type. $Mem$ provides information about the type of effect and on which region the effects happen. Monitor automata can of course monitor all $e$s, but given that we are interested in detecting ressource manipulation errors and these ressources are stored in memory, $Mem$ is what I will describe in greater detail. The type of effect is modelled as $mem\_kind$, as seen in the definition of $e$. These types can be formalized as follows.
+\begin{itemize}
+    \item $s_0 = Seq$ 
+    \item {
+        $
+            \begin{aligned}[t]
+            \delta = \mathit{the \; relation} \{ & (Seq, (\texttt{alloc},\rho), (allocated, \rho)), ((allocated, \rho), (\texttt{write}, \rho), (written, \rho)), \\
+            & ((written, \rho), If\_true(s), If\_true), ((written, \rho), If\_false(s), \\ & If\_false), (If\_true, Nil, End), (If\_false, Nil, End)\}
+            \end{aligned}
+        $ 
+    }
+    \item $F = Nil$  
+\end{itemize}
 
-\begin{equation*} 
-    \begin{split}
-        \begin{aligned}
-            e =\;   & \mathit{Mem} (mem\_kind, region) \\
-                    & \mathit{Noret} \\
-                    & \mathit{IrqsOn} \\
-                    & \mathit{IrqsOff} \\
-                    & \mathit{BhsOn} \\
-                    & \mathit{BhsOff} \\
-                    & \mathit{Var} (\mathit{effectvar}) \\
-                    & \mathit{Sleep} \\
-        \end{aligned}
-    \end{split}
-    \quad\quad\quad\quad\quad\quad\quad
-    \begin{split}
-        \begin{aligned}
-            mem\_kind =\;   & \mathit{Alloc} \\
-                            & \mathit{Free} \\
-                            & \mathit{Read} \\
-                            & \mathit{Write} \\
-                            & \mathit{Uninit} \\
-                            & \mathit{Call} \\
-                            & \mathit{Lock} \\
-                            & \mathit{Unlock} \\
-        \end{aligned}
-    \end{split}
-\end{equation*}
-
-\newpar A control flow defining effects of statements can be defined as a finite state machine $(\sum, S, s_0, \delta, F)$ as follows where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. 
+\noindent A few things are of note here; $Nil$ indicates the end of a path in the tree structure. $\mathit{If}$ indicates a branch in the input source file and models possible branches in if-statements.
 
 \subsection{Monitor Templates}
-A monitor template is defined as the quintuple $X_\rho (\sum, S, s_0, \delta, F)$ where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$.
+A monitor template is defined as the quintuple $X_\rho (\sum, S, s_0, \delta, F)$ where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states happening on the region $\rho$, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$.
 
 \newpar Monitor automata operate on the set of possible effects of a statement in the Control-flow Graph, which are defined as $E = \{$\texttt{alloc}, \texttt{free}, \texttt{read}, \texttt{write}, \texttt{uninit}, \texttt{call}, \texttt{lock}, \texttt{unlock}$\}$ by Abal \cite{EffectiveBugFinding}, corresponding all possible variants of the $mem\_kind$ type defined previously. 
 
