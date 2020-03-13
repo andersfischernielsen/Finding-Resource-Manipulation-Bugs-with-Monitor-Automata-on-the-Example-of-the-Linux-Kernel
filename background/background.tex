@@ -6,20 +6,18 @@
 
 EBA provides a representation of the control flow of the input source files which is utilized in order to detect bugs. EBA generates a tree structure of the input, modeling statements as so-called \texttt{step}s. A path in this tree structure models a possible execution path, with each \texttt{step} in a path containing information about the modelled statements. The concrete tree structure modeling the resulting effects of statements can be formalized as a finite state machine $(\sum, S, s_0, \delta, F)$ as follows where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. 
 
-\newpar \todo[inline]{Is this too complex?}
-
 \begin{itemize}
     \item{
         $
             \begin{aligned}[t] 
-                \sum = & \{\mathit{Entry}, \mathit{Nil}, \mathit{If_{true}}(s), \mathit{If_{false}}(s), (alloc, \rho), (free, \rho), (read, \rho), \\ & (write, \rho), (uninit, \rho), (call, \rho), (lock, \rho), (unlock, \rho)\}
+                \sum = & \{\mathit{Entry}, \mathit{Nil}, (alloc, \rho), (free, \rho), (read, \rho), \\ & (write, \rho), (uninit, \rho), (call, \rho), (lock, \rho), (unlock, \rho)\}
             \end{aligned} 
         $
     }
     \item{
         $
             \begin{aligned}[t]
-                S = & \{(allocated, \rho), \mathit{If_{true}}, \mathit{If_{false}}, (freed, \rho), (read, \rho), (written, \rho),\\ & (uninitialized, \rho), (called, \rho), (locked, \rho), (unlocked, \rho), End\}
+                S = & \{(allocated, \rho), (freed, \rho), (read, \rho), (written, \rho),\\ & (uninitialized, \rho), (called, \rho), (locked, \rho), (unlocked, \rho), End\}
             \end{aligned}
         $
     }
@@ -29,7 +27,7 @@ EBA provides a representation of the control flow of the input source files whic
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.3\textwidth]{background/figures/cfg_example}
+    \includegraphics[width=0.5\textwidth]{background/figures/cfg_example}
     \caption{An illustration of a Control Flow automaton.}
     \label{cfg_example-automaton}
 \end{figure}
@@ -39,24 +37,27 @@ EBA provides a representation of the control flow of the input source files whic
     \item {
         $
             \begin{aligned}[t]
-            \delta = \text{the relation} \; \{ & (Entry, (\texttt{alloc},\rho), (allocated, \rho)), \\ 
-            & ((allocated, \rho), (\texttt{write}, \rho), (written, \rho)), \\
-            & ((written, \rho), \mathit{If_{true}}(s), \mathit{If_{true}}), \\ 
-            & ((written, \rho), \mathit{If_{false}}(s), \mathit{If_{false}}), \\ 
-            & (\mathit{If_{true}}, Nil, End), (\mathit{If_{false}}, Nil, End)\}
+            \delta = \text{the relation} \; \{ \; & (Entry, (\texttt{alloc},\rho), (allocated, \rho)), \\ 
+            & (allocated, (\texttt{alloc},\rho), (allocated, \rho)), \\ 
+            & ((allocated, \rho), (\texttt{lock}, \rho), (locked, \rho)), \\
+            & ((locked, \rho), (\texttt{unlock}, \rho), (unlocked, \rho)), \\
+            & ((unlocked, \rho), \texttt{unlock}, (unlocked, \rho), \\ 
+            & ((write, \rho), \texttt{write}, (written, \rho)), \\ 
+            & ((unlocked, \rho), \texttt{Nil}, End), \\ 
+            & ((written, \rho), \texttt{Nil}, End) \; \}
             \end{aligned}
         $ 
     }
-    \item $F = \{End\}$  
+    \item $F = End$  
 \end{itemize}
 
-\noindent A few things are of note here; $Nil$ indicates the end of a path in the tree structure. $\mathit{If}$ indicates a branch in the input source file and models possible branches in if-statements.
+\noindent A few things are of note here; $Nil$ indicates the end of a path in the tree structure. Branches occur when an if-branch is encountered in the input source file and models the effects of the statements within if-statements.
 
 \subsection{Monitor Templates}
 
 \noindent \todo[inline]{How should the template generation function be defined?}
 
-\noindent A monitor template is defined as the quintuple $X_\rho (\sum, S, s_0, \delta, F)$ where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states happening on the region $\rho$, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$.
+\noindent A monitor template is defined as the quintuple $X(\rho) \rightarrow (\sum, S, s_0, \delta, F)$ or \todo{Which one? Different one?} $X_\rho (\sum, S, s_0, \delta, F)$ where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states happening on the region $\rho$, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$.
 
 \newpar Monitor automata operate on the set of possible effects of a statement in the Control-flow Graph, which are defined as $E = \{$\texttt{alloc}, \texttt{free}, \texttt{read}, \texttt{write}, \texttt{uninit}, \texttt{call}, \texttt{lock}, \texttt{unlock}$\}$ by Abal \cite{EffectiveBugFinding}, corresponding all possible variants of the $mem\_kind$ type defined previously. 
 
