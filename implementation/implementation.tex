@@ -21,6 +21,43 @@ The EBA framework allows specifying checker signatures whose implementations are
 
 \newpar When all paths in the CFG tree structure have been explored, the regions which map to accepting states along with their location and traces are extracted from the mapping and presented to the user as possible bugs. 
 
+\newpar This approach can be described in pseudocode as follows.
+
+\begin{algorithm}
+\begin{algorithmic}
+    \Function{apply\_transition} {effect, map}
+        \State{region $\gets$ effect.region}
+        \State{previous\_states\_for\_region $\gets$ \Call{find\_default}{[initial\_state], r, map}}
+        \State states $\gets$ \Call{fold}{\Call{transition} {state, effect, previous\_states\_for\_region}}
+        \State{\Return {\Call{add}{map, r, states}}}
+    \EndFunction
+    \\
+    \Function{explore\_paths} {$tree\_node$} {$map$} 
+        \If {$tree\_node$ is $\mathit{Nil}$}    
+            \State{\Return $map$}
+        \ElsIf {$tree\_node$ is $\mathit{If}(t, f)$}
+            \State{$true\_branch \gets $ \Call{explore\_paths}{t}}
+            \State{$false\_branch \gets $ \Call{explore\_paths}{f}} 
+            \State{\Return \Call{union}{$true\_branch$, $false\_branch$}}
+        \ElsIf {$tree\_node$ is $\mathit{Seq}(step, next)$}
+            \State{effects $\gets$ \Call{filter}{is\_in\_transition\_labels, step.effects}}
+            \If{\Call{is\_empty}{effects}}
+                \Return{\Call{explore\_paths}{remaining, map}}
+            \EndIf
+            \State{permutations $\gets$ \Call{find\_permutations}{effects}}
+            \State{\Return \State{\Call{fold}{\Call{fold}{{\Call{apply\_transition}{effect, map}) {map, effects}}}}}}
+            
+            \Comment{Find all possible states for permutations.}
+
+            \Comment{Add these states to the region map.}
+        \EndIf      
+    \EndFunction
+    \\
+    \State{tree $\gets $\Call{generate\_tree} {input\_file}}
+    \State{map $\gets $ \Call{explore\_paths}{tree}}
+\end{algorithmic}
+\end{algorithm}
+
 \subsection{Automata Signatures}
 
-The signature of monitor automata must be implemented in order to use the bug checker with EBA. The implementation of a given monitor automata is passed to the aforementioned \texttt{Make} module and is then used to evaluate states based on the effects of regions. The signature of the monitor automata specifies a \texttt{state} discriminated union type, describing the possible states of the automata as well as a transition function which requires a previous state of the state machine along with an input effect. In order to provide the user with detailed error reports this state is encapsulated in a checker state structure which keeps track of the current trace through the CFG along with granular location details for discovered bugs. Providing this information requires that the current CFG step must also be passed to the automata, due to the architecture of the EBA framework. The full signature for the transition function is therefore $transition: \mathit{checker\_state} \rightarrow \mathit{effect} \rightarrow \mathit{step} \rightarrow \mathit{checker\_state}$. 
+The signature of monitor automata must be implemented in order to use the bug checker with EBA. The implementation of a given monitor automata is passed to the aforementioned \texttt{Make} module and is then used to evaluate states based on the effects of regions. The signature of the monitor automata specifies a \texttt{state} as a discriminated union type, describing the possible states of the automata as well as a transition function, \texttt{transition}, which takes a previous state of the monitor along with an input effect. In order to provide the user with detailed error reports this state is encapsulated in a \texttt{checker state} structure which keeps track of the current trace through the CFG along with granular location details for discovered possible bugs. Providing this information requires that the current CFG node must also be passed to the automata, due to the architecture of the EBA framework. The full signature for the transition function is therefore $transition: \mathit{checker\_state} \rightarrow \mathit{effect} \rightarrow \mathit{step} \rightarrow \mathit{checker\_state}$. 
