@@ -3,18 +3,22 @@
 \todo[inline]{Section introduction}
 
 \subsection{Monitor Templates}
-\noindent Monitor automata are utilized in my work to monitor the control flow of a given input source file and detect whether possible bug are present in this control flow. A monitor automaton will change state based on what is happening within the control flow of a program. When this monitor automaton reaches its final state, then a possible bug has been discovered. The effect analysis provided by EBA allows monitoring which effects program points have, and monitor automata can then monitor these effects in order to determine whether possible bugs are present. Effects within EBA happen on a region in the input program, and monitor automata must therefore monitor effects happening on a given region in order to determine whether effects happening on this region lead to possible bugs. It is, for example, common to have multiple locks on different regions within programs, but a lock on one region followed by a lock on a different region does not neccesarily mean that a bug is present. Regions, along with their effects, must therefore be monitored by these monitor automata. This can be expressed formally as follows. 
+\noindent Monitor automata are utilized in my work to monitor the control flow of a given input source file and detect whether possible bug are present in this control flow. 
 
-\newpar Given a region variable $\rho$, a monitor template is defined as the quintuple $X_\rho (\sum, S, s_0, \delta, F)$ where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states happening on the region $\rho$, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. An illustration of such a monitor automaton can be seen in Figure \ref{double-lock-automata-intro}.
+\newpar A monitor automaton will change state based on what is happening in the control flow of a program. When this monitor automaton reaches its final state, then a possible bug has been discovered. The effect analysis provided by EBA allows monitoring which effects program points have, and monitor automata can then monitor these effects in order to determine whether possible bugs are present. 
+
+\newpar Effects within EBA happen on a region in the input program, and monitor automata must therefore monitor effects happening on a given region in order to determine whether effects happening on this region lead to possible bugs. It is, for example, common to have multiple locks on different regions within programs, but a lock on one region followed by a lock on a different region does not neccesarily mean that a bug is present. Regions, along with their effects, must therefore be monitored by these monitor automata. This can be expressed formally as follows. 
+
+\newpar Given a region variable $\rho$, a monitor template is defined as the quintuple $X_\rho (\sum, S, s_0, \delta, F)$ where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states happening on the region $\rho$, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. An illustration of such a monitor automaton can be seen in Figure \ref{double-unlock-automata-intro}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{background/figures/double-lock}
+    \includegraphics[width=0.5\textwidth]{background/figures/double-unlock}
     \caption{An illustration of a monitor automaton.}
-    \label{double-lock-automata-intro}
+    \label{double-unlock-automata-intro}
 \end{figure}
 
-\newpar Monitor automata operate on the set of possible effects of a statement in the Control-flow Graph, which are defined as $E = \{$\texttt{alloc}, \texttt{free}, \texttt{read}, \texttt{write}, \texttt{uninit}, \texttt{call}, \texttt{lock}, \texttt{unlock}$\}$ by Abal \cite{EffectiveBugFinding}, corresponding all possible variants of the $mem\_kind$ type defined previously. 
+\newpar Monitor automata operate on the set of possible effects of a statement in the Control-flow Graph, which are defined as $E = \{$\texttt{alloc}, \texttt{free}, \texttt{read}, \texttt{write}, \texttt{uninit}, \texttt{call}, \texttt{lock}, \texttt{unlock}$\}$ by Abal \cite{EffectiveBugFinding}. 
 
 \newpar Monitor automata in this thesis all operate on a subset of $E$ and have a non-empty set of final states, $F$, indicating that a possible bug is discovered.  
 
