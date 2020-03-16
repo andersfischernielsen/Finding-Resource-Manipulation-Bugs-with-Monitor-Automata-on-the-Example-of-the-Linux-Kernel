@@ -84,7 +84,56 @@ An illustration of this monitor automata can be seen in figure \ref{double-unloc
     \caption{An illustration of a double-unlock monitor automata.}
     \label{double-unlock-automata}
 \end{figure}
-    
+
+\newpar To show the detection of a possible double-unlock bug where a double-unlock monitor automaton has reached the final state, we find the product of the control flow example shown in figure \ref{cfg_example-automaton} and the monitor generated from the template. 
+
+\begin{itemize}
+    \item{
+        $
+            \begin{aligned}[t] 
+                \sum = & \{\mathit{Entry}, \mathit{Nil}, (alloc, \rho), (free, \rho), (read, \rho), \\ 
+                & (write, \rho), (uninit, \rho), (call, \rho), (lock, \rho), (unlock, \rho)\}
+            \end{aligned} 
+        $
+    }
+    \item{
+        $
+            \begin{aligned}[t]
+                S = & \{(allocated, \rho), (freed, \rho), (read, \rho), (written, \rho),\\ 
+                & (uninitialized, \rho), (called, \rho), \\
+                & ((locked, \rho), locked_\rho), ((unlocked, \rho), unlocked_\rho), \\
+                & ((unlocked, \rho), error_\rho), \\
+                & End\}
+            \end{aligned}
+        $
+    }
+    \item $s_0 = Entry$ 
+    \item {
+        $
+            \begin{aligned}[t]
+            \delta = \text{the relation} \; \{ \; & (Entry, (\texttt{alloc},\rho), (allocated, \rho)), \\ 
+            & (allocated, (\texttt{alloc},\rho), (allocated, \rho)), \\ 
+            & ((allocated, \rho), (\texttt{lock}, \rho), (locked, \rho)), \\
+            & ((locked, \rho), (\texttt{unlock}, \rho), ((unlocked, \rho), unlocked_\rho), \\
+            & (((unlocked, \rho), unlocked_\rho), \texttt{unlock}, ((unlocked, \rho), error_\rho)), \\ 
+            & (((write, \rho), unlocked_\rho), \texttt{write}, ((written, \rho), unlocked_\rho)), \\ 
+            & (((unlocked, \rho), error_\rho), \texttt{Nil}, (End, error_\rho)), \\ 
+            & (((written, \rho), unlocked_\rho), \texttt{Nil}, (End, error_\rho)) \; \}
+            \end{aligned}
+        $ 
+    }
+    \item $F = (End, error_\rho)$  
+\end{itemize}
+
+\noindent This product can be illustrated as follows. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{background/figures/cfg_unlock-product}
+    \caption{An illustration of the product construction of a double-unlock monitor automata and a control flow.}
+    \label{cfg_unlock-product}
+\end{figure}
+
 \subsubsection{Double-lock monitor automata}
 
 Given a region $\rho$, a double-lock monitor automata is defined as the quintuple $(\sum, S, s_0, \delta, F)$ where: 
