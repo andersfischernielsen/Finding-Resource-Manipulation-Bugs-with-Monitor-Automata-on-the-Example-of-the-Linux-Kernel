@@ -44,55 +44,6 @@ Given a region $\rho$, a double-unlock monitor automata is defined as the quintu
 
 An illustration of this monitor automata can be seen in Figure \ref{double-unlock-automata}. 
 
-\newpar To show the detection of a possible double-unlock bug where a double-unlock monitor automaton has reached the final state, we find the product of the control flow example shown in Figure \ref{cfg_example-automaton} and the monitor generated from the template. 
-
-\begin{itemize}
-    \item{
-        $
-            \begin{aligned}[t] 
-                \sum = & \{\mathit{Entry}, \mathit{Nil}, (alloc, \rho), (free, \rho), (read, \rho), \\ 
-                & (write, \rho), (uninit, \rho), (call, \rho), (lock, \rho), (unlock, \rho)\}
-            \end{aligned} 
-        $
-    }
-    \item{
-        $
-            \begin{aligned}[t]
-                S = & \{(allocated, \rho), (freed, \rho), (read, \rho), (written, \rho),\\ 
-                & (uninitialized, \rho), (called, \rho), \\
-                & ((locked, \rho), locked_\rho), ((unlocked, \rho), unlocked_\rho), \\
-                & ((unlocked, \rho), error_\rho), \\
-                & End\}
-            \end{aligned}
-        $
-    }
-    \item $s_0 = Entry$ 
-    \item {
-        $
-            \begin{aligned}[t]
-            \delta = \text{the relation} \; \{ \; & (Entry, (\texttt{alloc},\rho), (allocated, \rho)), \\ 
-            & (allocated, (\texttt{alloc},\rho), (allocated, \rho)), \\ 
-            & ((allocated, \rho), (\texttt{lock}, \rho), (locked, \rho)), \\
-            & ((locked, \rho), (\texttt{unlock}, \rho), ((unlocked, \rho), unlocked_\rho), \\
-            & (((unlocked, \rho), unlocked_\rho), \texttt{unlock}, ((unlocked, \rho), error_\rho)), \\ 
-            & (((write, \rho), unlocked_\rho), \texttt{write}, ((written, \rho), unlocked_\rho)), \\ 
-            & (((unlocked, \rho), error_\rho), \texttt{Nil}, (End, error_\rho)), \\ 
-            & (((written, \rho), unlocked_\rho), \texttt{Nil}, (End, error_\rho)) \; \}
-            \end{aligned}
-        $ 
-    }
-    \item $F = (End, error_\rho)$  
-\end{itemize}
-
-\noindent This product can be illustrated as follows. 
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{background/figures/cfg_unlock-product}
-    \caption{An illustration of the product construction of a double-unlock monitor automata and a control flow.}
-    \label{cfg_unlock-product}
-\end{figure}
-
 \subsubsection{Double-lock monitor automata}
 
 \begin{figure}[H]
@@ -215,3 +166,52 @@ The alphabet, $\sum$, of the of the control flow abstraction is the set of all e
 \end{itemize}
 
 \noindent A few things are of note here; $Nil$ indicates the end of a path in the tree structure. Branches occur when an if-branch is encountered in the input source file and models the effects of the statements within if-statements.
+
+\newpar To show the detection of a possible double-unlock bug where a double-unlock monitor automaton has reached the final state, we find the product of the control flow example shown in Figure \ref{cfg_example-automaton} and the monitor generated from the template. 
+
+\begin{itemize}
+    \item{
+        $
+            \begin{aligned}[t] 
+                \sum = & \{\mathit{Entry}, \mathit{Nil}, (alloc, \rho), (free, \rho), (read, \rho), \\ 
+                & (write, \rho), (uninit, \rho), (call, \rho), (lock, \rho), (unlock, \rho)\}
+            \end{aligned} 
+        $
+    }
+    \item{
+        $
+            \begin{aligned}[t]
+                S = & \{(allocated, \rho), (freed, \rho), (read, \rho), (written, \rho),\\ 
+                & (uninitialized, \rho), (called, \rho), \\
+                & ((locked, \rho), locked_\rho), ((unlocked, \rho), unlocked_\rho), \\
+                & ((unlocked, \rho), error_\rho), \\
+                & End\}
+            \end{aligned}
+        $
+    }
+    \item $s_0 = Entry$ 
+    \item {
+        $
+            \begin{aligned}[t]
+            \delta = \text{the relation} \; \{ \; & (Entry, (\texttt{alloc},\rho), (allocated, \rho)), \\ 
+            & (allocated, (\texttt{alloc},\rho), (allocated, \rho)), \\ 
+            & ((allocated, \rho), (\texttt{lock}, \rho), (locked, \rho)), \\
+            & ((locked, \rho), (\texttt{unlock}, \rho), ((unlocked, \rho), unlocked_\rho), \\
+            & (((unlocked, \rho), unlocked_\rho), \texttt{unlock}, ((unlocked, \rho), error_\rho)), \\ 
+            & (((write, \rho), unlocked_\rho), \texttt{write}, ((written, \rho), unlocked_\rho)), \\ 
+            & (((unlocked, \rho), error_\rho), \texttt{Nil}, (End, error_\rho)), \\ 
+            & (((written, \rho), unlocked_\rho), \texttt{Nil}, (End, error_\rho)) \; \}
+            \end{aligned}
+        $ 
+    }
+    \item $F = (End, error_\rho)$  
+\end{itemize}
+
+\noindent This product is illustrated in Figure \ref{cfg_unlock-product}. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{background/figures/cfg_unlock-product}
+    \caption{An illustration of the product construction of a double-unlock monitor automata and a control flow.}
+    \label{cfg_unlock-product}
+\end{figure}
