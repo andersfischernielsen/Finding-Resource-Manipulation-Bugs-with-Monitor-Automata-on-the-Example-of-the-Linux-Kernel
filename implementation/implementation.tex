@@ -27,6 +27,8 @@ In order to implement a new bug checker into EBA, the implementation has to conf
 
 \noindent Seq-nodes contain a \textit{step} which models a statement in the input source code. When a \textit{Seq}-node is discovered in the tree, the --- possibly multiple --- effects of its containing step are explored. An illustration of this node can be seen in Figure \ref{cfg-step}. These possibly multiple effects raise a problem; since a given step contains a set of effects, the order of these effects are therefore not known and all orders of executing these effects must be explored. This must be done, since a given ordering of effects can lead to a bug, while a different order might not. All permutations of the set of effects must therefore be found and mapped to a given region, while also preserving the information of the other permutations for that given region. Furthermore, the transition function of the monitor automata must be evaluated on the current input, resulting in a new state of that automata which again must also be stored for that region. 
 
+\todo[inline]{Explain instantiation of automata based on effect permutations.}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{implementation/figures/step}
