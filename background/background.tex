@@ -167,7 +167,28 @@ The alphabet, $\sum$, of the of the control flow abstraction is the set of all e
 
 \noindent A few things are of note here; $Nil$ indicates the end of a path in the tree structure. Branches occur when an if-branch is encountered in the input source file and models the effects of the statements within if-statements.
 
-\newpar To show the detection of a possible double-unlock bug where a double-unlock monitor automaton has reached the final state, we find the product of the control flow example shown in Figure \ref{cfg_example-automaton} and the monitor generated from the template. 
+\newpar To show the detection of a possible double-unlock bug where a double-unlock monitor automaton has reached the final state, we find the product of the control flow example shown in Figure \ref{cfg_example-automaton} and the monitor generated from the template. Since monitors generated from the monitor template only monitor a given input region, it is necessary to define rules for the state changes within this product, given that a monitor only accepts effects on a given region. In other words, the state of the automata should not change if the effect does not happen on the monitored region, but the automaton representing the control flow \textit{should}. These requirements can be formalized as follows.
+
+\begin{center}
+\begin{prooftree}
+    \hypo{s \xrightarrow{e} s'}
+    \hypo{p \xrightarrow{E} p'}
+    \hypo{e \in E}
+    \infer3{(s, p) \rightarrow (s', p')}
+\end{prooftree}
+\hspace{2cm}
+\begin{prooftree}
+    \hypo{p \xrightarrow{E} p'}
+    \hypo{\forall e \in E\:.\:s \centernot{\xrightarrow{e}}}
+    \infer2{(s, p) \rightarrow (s, p')}
+\end{prooftree}
+\end{center}
+
+\newpar $E$ is the set of effects happening in a given program step, $p \rightarrow p'$. The state $s$ will change given that the transition happens on the effect $e$, present in $E$. If this is not the case, the control flow will have changed state to $p'$, while the monitor has not and stays the same, $s$. 
+
+\todo[inline]{Show/explain how products are found.}
+
+\newpar The product of the control flow example shown in Figure \ref{cfg_example-automaton} and a generated double-unlock monitor automaton can now be found in order to demonstrate that a possible bug is detected by the monitor, resulting in the following definition. This definition is illustrated in Figure \ref{cfg_unlock-product}. 
 
 \begin{itemize}
     \item{
@@ -215,3 +236,12 @@ The alphabet, $\sum$, of the of the control flow abstraction is the set of all e
     \caption{An illustration of the product construction of a double-unlock monitor automata and a control flow.}
     \label{cfg_unlock-product}
 \end{figure}
+
+\newpar I have shown that it is possible to construct monitor templates, which allows generating monitor automata monitoring effects happening on a region, and shown that such a monitor can detect a possible bug in an example control flow. In order to implement this approach in practice, two things are needed, namely
+
+\begin{itemize}
+    \item A control flow abstraction
+    \item Concrete definitions of monitor templates
+\end{itemize}
+
+It is therefore necessary to implement these monitor templates, since the EBA framework can provide the control flow abstractions over a given input file. I will present the implemetation of the monitor templates as part of my work in the following section. 
