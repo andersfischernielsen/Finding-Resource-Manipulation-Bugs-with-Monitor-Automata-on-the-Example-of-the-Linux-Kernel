@@ -47,7 +47,7 @@ In order to implement a new bug checker into EBA, the implementation has to conf
 
 \noindent This map can be formalized as the function $m: region \rightarrow { checker\_state }$ where $ checker\_state $ is the internal state of the monitor automata. Using this map it is possible to apply each permutation of effects and fold this list of effects into a modified map with possibly altered automata states for their corresponding regions. The resulting map can be explored in order to find any accepting states of monitor automata for a given region. 
 
-\newpar Monitors need to be instantiated whenever a new region is encountered and stored in the map. Given that the map maps a region to the state of monitor automatas, the length of the map will never be larger than the number of regions in the input source file. The size of the set of possible monitor automata states for a given region depends on the effects of a statement operating on a given region. Given a large number of possible effects of a statement the resulting set of permutations of these effects will naturally grow. A set of $N$ effects will result in $N!$ permutations; in other words, the number of monitor automata states for a given region will therefore in the worst case be $|effects|!$. In practice statements lead to a small number of effects and this has not posed a problem during testing.
+\newpar Monitors need to be instantiated whenever a new region is encountered and stored in the map. Given that the map maps a region to the state of monitor automatas, the length of the map will never be larger than the number of regions in the input source file. The size of the set of possible monitor automata states for a given region depends on the effects of a statement operating on a given region. Given a large number of possible effects of a statement the resulting set of permutations of these effects will naturally grow. A set of $N$ effects will result in $N!$ permutations; in other words, the number of monitor automata states for a given region will therefore in the worst case be $|\mathit{effects}|!$. In practice, program points lead to a small number of effects and this has not posed a problem during testing.
 
 \newpar When all paths in the CFG tree structure have been explored, the regions which map to accepting states along with their location and traces are extracted from the mapping and presented to the user as possible bugs.  
 
@@ -55,7 +55,7 @@ In order to implement a new bug checker into EBA, the implementation has to conf
 
 \begin{algorithm}[H]
 \begin{algorithmic}
-    \Function{explore\_paths} {$tree\_node$} {$map$} 
+    \Function{explore\_paths} {$tree\_node$, $map$} 
         \If {$tree\_node$ is $\mathit{Nil}$}    
             \State{\Return $map$}
         \ElsIf {$tree\_node$ is $\mathit{If}(t, f)$}
@@ -65,10 +65,12 @@ In order to implement a new bug checker into EBA, the implementation has to conf
         \ElsIf {$tree\_node$ is $\mathit{Seq}(step, next)$}
             \State{effects $\gets$ step.effects}
             \If{\Call{is\_empty}{effects}}
-                \Return{\Call{explore\_paths}{remaining, map}}
+                \Return{\Call{explore\_paths}{next, map}}
             \EndIf
             \State{permutations $\gets$ \Call{find\_permutations}{effects}}
-            \State{\Return \State{\Call{fold}{\Call{fold}{{\Call{apply\_transition}{effect, map}) {map, effects}}}}}}
+            \State{\Return 
+                \State{\Call{fold}{
+                    \State{\hskip\algorithmicindent \Call{fold} {\Call{apply\_transition} {effect, map}{, map, effects}}{, \State{map, effects}}}}}}
             
             \Comment{Find all possible states for permutations.}
 
