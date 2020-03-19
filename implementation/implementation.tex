@@ -27,15 +27,22 @@ In order to implement a new bug checker into EBA, the implementation has to conf
     \label{cfg-nodes}
 \end{figure}
 
-\noindent Seq-nodes contain a \textit{step} which models a statement in the input source code. When a \textit{Seq}-node is discovered in the tree, the --- possibly multiple --- effects of its containing step are explored. An illustration of this node can be seen in Figure \ref{cfg-step}. These possibly multiple effects raise a problem; since a given step contains a set of effects, the order of these effects are therefore not known and all orders of executing these effects must be explored. This must be done, since a given ordering of effects can lead to a bug, while a different order might not. All permutations of the set of effects must therefore be found and mapped to a given region, while also preserving the information of the other permutations for that given region. Furthermore, the transition function of the monitor automata must be evaluated on the current input, resulting in a new state of that automata which again must also be stored for that region. 
-
-\todo[inline]{Explain instantiation of automata based on effect permutations.}
+\noindent Seq-nodes contain a \textit{step} which models a statement in the input source code. When a \textit{Seq}-node is discovered in the tree, the --- possibly multiple --- effects of its containing step are explored. An illustration of this node can be seen in Figure \ref{cfg-step}. These possibly multiple effects raise a problem; since a given step contains a set of effects, the order of these effects are therefore not known and all orders of executing these effects must be explored. This must be done since a given ordering of effects can lead to a bug, while a different order might not. All permutations of the set of effects must therefore be found and mapped to a given region, while also preserving the information of the other permutations for that given region. Furthermore, the transition function of the monitor automata must be evaluated on the current input, resulting in a new state of that automata which again must also be stored for that region. 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{implementation/figures/step}
     \caption{An illustration of the step type and its containing structures found in EBA.}
     \label{cfg-step}
+\end{figure}
+
+\noindent In order to accomplish this, the current state of the monitor monitoring a region needs to be copied and stored in the map for each permutation found for a given set of effects in order to explore all possible effect orderings. These copies are then stored in the map for the given region and future effects on that region are then applied on these copies. An illustration of this copying on two permutations followed by another effect happening on the same region can be seen in Figure \ref{permutation-copy}, leading to a possible double-unlock bug.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{implementation/figures/permutation-copy}
+    \caption{An illustration of how copies of a double-unlock monitor are instantiated given multiple permutations of effect orderings.}
+    \label{permutation-copy}
 \end{figure}
 
 \noindent This map can be formalized as the function $m: region \rightarrow { checker\_state }$ where $ checker\_state $ is the internal state of the monitor automata. Using this map it is possible to apply each permutation of effects and fold this list of effects into a modified map with possibly altered automata states for their corresponding regions. The resulting map can be explored in order to find any accepting states of monitor automata for a given region. 
@@ -71,7 +78,7 @@ In order to implement a new bug checker into EBA, the implementation has to conf
     \\
     \Function{apply\_transition} {effect, map}
         \State{region $\gets$ effect.region}
-        \State{previous\_states\_for\_region $\gets$ \Call{find\_default}{[initial\_state], r, map}}
+        \State{previous\_states\_for\_region $\gets$ \Call{find\_default}{[initial\_state], region, map}}
         \State states $\gets$ \Call{fold}{\Call{transition} {state, effect, previous\_states\_for\_region}}
         \State{\Return {\Call{add}{map, region, states}}}
     \EndFunction
