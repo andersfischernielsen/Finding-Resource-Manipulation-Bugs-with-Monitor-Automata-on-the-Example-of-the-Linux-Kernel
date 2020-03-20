@@ -1,15 +1,18 @@
-\section{Background}
+\section{Theory}
 
-\todo[inline]{Section introduction}
+\todo[inline]{Improve title}
+\todo[inline]{Add section introduction here}
 
 \subsection{Monitor Templates}
 \noindent Monitor automata are utilized in my work to monitor the control flow of a given input source file and detect whether possible bug are present in this control flow. 
 
 \newpar A monitor automaton will change state based on what is happening in the control flow of a program. When this monitor automaton reaches its final state, then a possible bug has been discovered. The effect analysis provided by EBA allows monitoring which effects program points have, and monitor automata can then monitor these effects in order to determine whether possible bugs are present. 
 
-\newpar Effects within EBA happen on a region in the input program, and monitor automata must therefore monitor effects happening on a given region in order to determine whether effects happening on this region lead to possible bugs. It is, for example, common to have multiple locks on different regions within programs, but a lock on one region followed by a lock on a different region does not neccesarily mean that a bug is present. Regions, along with their effects, must therefore be monitored by these monitor automata. This can be expressed formally as follows. 
+\newpar Effects within EBA happen on a region in the input program, and monitor automata must therefore monitor effects happening on a given region in order to determine whether effects happening on this region lead to possible bugs. It is, for example, common to have multiple locks on different regions within programs, but a lock on one region followed by a lock on a different region does not neccesarily mean that a bug is present. Regions, along with their effects, must therefore be monitored by these monitor automata. Monitor templates can be defined as \textit{long-term} monitors or \textit{short-term} monitors. \textit{Long-term} monitors will monitor effects happening on a region indefinitely until a final state is reached. \textit{Short-term} monitors operate as \textit{long-term} monitors, with the addition of a kill-state $K$, which indicates that effects happening on a region are legal and that the monitor can be terminated for performance reasons. Monitor templates are defined formally as follows. 
 
-\newpar Given a region variable $\rho$, a monitor template is defined as the quintuple $X_\rho (\sum, S, s_0, \delta, F)$ where $\sum$ is the input alphabet, $S$ is a finite non-empty set of states happening on the region $\rho$, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. An illustration of such a monitor automaton can be seen in Figure \ref{double-unlock-automata-intro}.
+\todo[inline]{Does this split between short-term and long-term templates make things too difficult? Can the definitions be merged?}
+
+\newpar Given a region variable $\rho$, a \textit{long-term} monitor template is defined as the quintuple $X_\rho (\sum, S, s_0, \delta, \\F)$ where $\sum$ is the alphabet, $S$ is a finite non-empty set of states happening on the region $\rho$, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. An illustration of such a monitor automaton can be seen in Figure \ref{double-unlock-automata-intro}. 
 
 \begin{figure}[H]
     \centering
@@ -17,6 +20,8 @@
     \caption{An illustration of a monitor automaton.}
     \label{double-unlock-automata-intro}
 \end{figure}
+
+\newpar Given a region variable $\rho$, a \textit{short-term} monitor template is defined as the sextuple $X_\rho (\sum, S, s_0, \delta, \\F, K)$ where $\sum$ is the alphabet, $S$ is a finite non-empty set of states happening on the region $\rho$, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$, $F$ is the possibly empty set of final states and a subset of $S$ and $K$ is the non-empty set of \textit{kill-states} and a subset of $S$.
 
 \newpar Monitor automata operate on the set of possible effects of a statement in the Control-flow Graph, which are defined as $E = \{$\texttt{alloc}, \texttt{free}, \texttt{read}, \texttt{write}, \texttt{uninit}, \texttt{call}, \texttt{lock}, \texttt{unlock}$\}$ by Abal \cite{EffectiveBugFinding}. 
 
@@ -169,29 +174,26 @@ EBA provides a representation of the control flow of the input source files whic
 
 \newpar To show the detection of a possible double-unlock bug where a double-unlock monitor automaton has reached the final state, we find the product of the control flow example shown in Figure \ref{cfg_example-automaton} and the monitor generated from the template. 
 
-\newpar Given two automata $A = (\sum, S, s_0, \delta, F)$ and $A' = (\sum, S', s'_0, \delta', F')$ both working over the same alphabet $\sum$, the product automaton of $A$ and $A'$ is an automaton $P = (\sum, Q, s'_0, \delta_P, F_P)$ where $Q = S \times S'$ and $\delta_P : Q \times \sum \rightarrow Q$. Furthermore, $\forall q \in Q , q' \in Q'$ and $e \in \sum$, we require $\delta_P((q, q'), e) = (\delta(q, e), \delta'(q', e))$. $F_N$ is for our purposes $F_N = F \times F'$. 
-
-\newpar \todo[inline]{Tie requirements below together with definition above. }
-
-\newpar Since monitors generated from the monitor template only monitor a given input region, it is necessary to define rules for the state changes within this product, given that a monitor only accepts effects on a given region. In other words, the state of the automata should not change if the effect does not happen on the monitored region, but the automaton representing the control flow \textit{should}. These requirements can be formalized as follows.
+\newpar Given two automata $A_CFG = (\sum, S, s_0, \delta, F)$ and $A_monitor = (\sum, S', s'_0, \delta', F')$ both working over the same alphabet $\sum$, the product automaton of $A_CFG$ and $A_monitor$ is an automaton $P = (\sum, Q, s'_0, \delta_P, F_P)$ where $F_N = S \times F'$, $Q = S \times S'$ and $\delta_P : Q \times \sum \rightarrow Q$. Furthermore, $\forall q \in Q , q' \in Q'$ and $e \in \sum$, we require that since monitors generated from the monitor template only monitor a given input region, it is necessary to define rules for the state changes within this product, given that a monitor only accepts effects on a given region. This requirement can be formalized as follows.
 
 \begin{center}
-\begin{prooftree}
-    \hypo{s \xrightarrow{e} s'}
-    \hypo{p \xrightarrow{E} p'}
-    \hypo{e \in E}
-    \infer3{(s, p) \rightarrow (s', p')}
-\end{prooftree}
-\hspace{2cm}
-\begin{prooftree}
-    \hypo{p \xrightarrow{E} p'}
-    \hypo{\forall e \in E\:.\:s \centernot{\xrightarrow{e}}}
-    \infer2{(s, p) \rightarrow (s, p')}
-\end{prooftree}
+    \begin{prooftree}
+        \hypo{s \xrightarrow{e} s'}
+        \hypo{p \xrightarrow{E} p'}
+        \hypo{e \in E}
+        \infer3{(s, p) \rightarrow (s', p')}
+    \end{prooftree}
+    \hspace{2cm}
+    \begin{prooftree}
+        \hypo{p \xrightarrow{E} p'}
+        \hypo{\forall e \in E\:.\:s \centernot{\xrightarrow{e}}}
+        \infer2{(s, p) \rightarrow (s, p')}
+    \end{prooftree}
 \end{center}
-
+    
 \newpar $E$ is the set of effects happening in a given program step, $p \rightarrow p'$. The state $s$ will change given that the transition happens on the effect $e$, present in $E$. If this is not the case, the control flow will have changed state to $p'$, while the monitor has not and stays the same, $s$. 
 
+\newpar In other words, the state of the automata should not change if the effect does not happen on the monitored region, but the automaton representing the control flow \textit{should}. 
 
 \newpar The product of the control flow example shown in Figure \ref{cfg_example-automaton} and a generated double-unlock monitor automaton can now be found in order to demonstrate that a possible bug is detected by the monitor, resulting in the following definition. This definition is illustrated in Figure \ref{cfg_unlock-product}. 
 
@@ -242,7 +244,7 @@ EBA provides a representation of the control flow of the input source files whic
     \label{cfg_unlock-product}
 \end{figure}
 
-\newpar I have shown that it is possible to construct monitor templates, which allows generating monitor automata monitoring effects happening on a region, and shown that such a monitor can detect a possible bug in an example control flow. In order to implement this approach in practice, two things are needed, namely
+\newpar I have shown that it is possible to construct monitor templates which allows generating monitor automata monitoring effects happening on a region and shown that such a monitor can detect a possible bug in an example control flow. In order to implement this approach in practice, two things are needed, namely
 
 \begin{itemize}
     \item A control flow abstraction
