@@ -1,6 +1,5 @@
-\section{Theory}
+\section{Theory\todo{Improve title}}
 
-\todo[inline]{Improve title}
 \todo[inline]{Add section introduction here}
 
 \subsection{Monitor Templates}
@@ -8,7 +7,9 @@
 
 \newpar A monitor automaton will change state based on what is happening in the control flow of a program. When this monitor automaton reaches its final state, then a possible bug has been discovered. The effect analysis provided by EBA allows monitoring which effects program points have, and monitor automata can then monitor these effects in order to determine whether possible bugs are present. 
 
-\newpar Effects within EBA happen on a region in the input program, and monitor automata must therefore monitor effects happening on a given region in order to determine whether effects happening on this region lead to possible bugs. It is, for example, common to have multiple locks on different regions within programs, but a lock on one region followed by a lock on a different region does not neccesarily mean that a bug is present. Regions, along with their effects, must therefore be monitored by these monitor automata. Monitor templates can be defined as \textit{long-term} monitors or \textit{short-term} monitors. \textit{Long-term} monitors will monitor effects happening on a region indefinitely until a final state is reached. \textit{Short-term} monitors operate as \textit{long-term} monitors, with the addition of a kill-state $K$, which indicates that effects happening on a region are legal and that the monitor can be terminated for performance reasons. Monitor templates are defined formally as follows. 
+\newpar Effects within EBA happen on a region in the input program, and monitor automata must therefore monitor effects happening on a given region in order to determine whether effects happening on this region lead to possible bugs. It is, for example, common to have multiple locks on different regions within programs, but a lock on one region followed by a lock on a different region does not neccesarily mean that a bug is present. Regions, along with their effects, must therefore be monitored by these monitor automata. 
+
+\newpar Monitor templates are defined as \textit{long-term} templates or \textit{short-term} templates. \textit{Long-term} templates will monitor effects happening on a region indefinitely until a final state is reached. \textit{Short-term} templates operate as \textit{long-term} templates, with the addition of a kill-state $K$, indicating that effects happening on a region are legal and that the monitor can be terminated. Monitor templates are defined formally as follows. 
 
 \todo[inline]{Does this split between short-term and long-term templates make things too difficult? Can the definitions be merged?}
 
