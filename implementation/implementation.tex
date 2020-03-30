@@ -1,23 +1,26 @@
 \section{Finding Double-Unlock Bugs in Practice}
-This section will detail how the abstractions defined previously are integrated into the EBA framework in order to explore the control flow of input programs while generating the product of the control flow and monitor automata in order to detect possible bugs. 
+This section will detail how the abstractions defined previously are integrated into the EBA framework in order to explore the control flow graph of input programs while generating the product of the control flow and monitor automata in order to detect possible bugs. 
 
 \subsection{Integration into EBA}
-In order to implement a new bug checker into EBA, the implementation has to conform to the structure set up by the framework of how these checkers should behave. Furthermore, signatures must be defined for these checkers in order to allow the framework to instantiate these checkers according to user input. This section will describe how this has been accomplished.  
+In order to implement a new bug checker in EBA, the implementation has to conform to the structure set up by the framework of how these checkers should behave. Furthermore, signatures must be defined for these checkers in order to allow the framework to instantiate these checkers on the inferred regions of an input program. This section will describe how this has been accomplished.  
 
 \newpar The EBA framework allows specifying checker signatures whose implementations are executed on a given input source file. Checker signature implementations instantiate a given bug checker for a given bug type and the internal logic of the bug checker is run by the framework. 
 
 \newpar These bug checkers must conform to the existing signatures of EBA in order to allow the framework to instantiate a given bug checker after which an abstract representation of the input source file is passed to the instantiated checker. 
 
-\newpar In order to detect possible bugs in input programs, a control flow graph and an instantiation of the given monitor automata monitoring the control flow are required. The control flow is provided by the EBA framework, while the monitor automata have been defined and implemented as part of my work. 
+\newpar In order to detect possible bugs in input programs, monitor automata are used to detect bugs over control flow graphs. The control flow graph is provided by the EBA framework, while the monitor automata have been defined and implemented as part of this thesis. 
 
-\newpar A signature for a checker which allows instantiation of monitor automata bug checkers has been defined as part of my work. This signature is then implemented in order to let EBA instantiate the implemented checker. A function, \texttt{check}, is the only requirement for implementing this signature and takes two parameters after which it returns a list of strings for each detected possible bug in the input source file as expected by the EBA framework. These parameters are the abstractions of the input file and each global function defined in this file, both of which are passed to the function by the framework. This mimics the implementation of the existing CTL checkers in EBA and allows for easy integration into the framework. 
+\newpar A signature for a checker which allows instantiation of monitor automata bug checkers has been defined as part of this thesis. This signature is then implemented in order to let EBA instantiate the implemented checker. A function, \texttt{check}, is the only requirement for implementing this signature and takes two parameters after which it returns a list of strings for each detected possible bug in the input source file as expected by the EBA framework. These parameters are the abstractions of the input file and each global function defined in this file, both of which are passed to the function by the framework. This mimics the implementation of the existing CTL checkers in EBA and allows for easy integration into the framework. 
 
 \newpar The aforementioned signature is implemented as a module, \texttt{Make}, which is used by EBA in order to run automata bug checkers conforming to an automata signature. Specifying a signature which all automata-based checkers must conform to ensures that the automata expose the required state and transition functions for them to run. This \texttt{Make} module expects an implementation of this \texttt{AutomataSpec} signature. 
 
-\newpar The \texttt{check} of the \texttt{Make} module explores the CFG provided by the EBA framework of the given file and applies the transition of the monitor automata using the effects of statements, which are represented as nodes in the CFG. The tree is then explored further until the end of each path in the tree is explored, resulting in a set of monitor automata states, which can then be explored in order to determine if any automata have reached accepting states. If such a state is present, a possible bug has been discovered. This on-the-fly exploration and application of transition functions models the product construction of the control flow automata and monitor decribed in Chapter \ref{monitor-template-section}. On-the-fly exploration is used since EBA has been designed around exploring effects when they are encountered due to performance reasons \cite{Abal2017EffectiveBF}. 
+\newpar When inferred effects happening on regions are encountered in the control flow graph, a monitor is instantiated based on the monitor template defined in \texttt{Make}. The \texttt{check} function of the \texttt{Make} module explores the CFG provided by the EBA framework of the given file and applies the transition of the monitor using the effects of statements, represented as nodes in the CFG. The control flow graph is represented as a tree-like structure, and this tree is then explored further until the end of each path in the tree is explored, resulting in a set of monitor states. This set of states can then be explored in order to determine if any monitors have reached accepting --- Error --- states. If such a state is present, a possible bug has been discovered. This on-the-fly exploration and application of transition functions models the product construction of the control flow automata and monitor decribed in Chapter \ref{monitor-template-section}. On-the-fly exploration is used since the design of EBA necessitates exploring effects when they are encountered due to performance reasons \cite{Abal2017EffectiveBF}. 
 
-\newpar EBA can generate the required control flow abstraction, which is used for analysis. My work consists of integrating the implementation of monitor templates into the existing framework, using the control flow abstractions provided by EBA. In order to present how monitor templates are instantiated based on the given control flow, it is necessary to describe the control flow abstractions. EBA generates a tree structure of the input, modeling statements as so-called \texttt{step}s. A path in this tree structure models a possible execution path, with each \texttt{step} in a path containing information about the modelled statements. The implementation of \texttt{check}, initiating the generation of the control flow abstraction using EBA can be seen in Figure \ref{check-implementation}. 
+\todo[inline]{Explain how product construction in previous section corresponds to this on-the-fly exploration.}
 
+\newpar EBA can generate the required control flow abstraction, which is used for analysis. This thesis consists of integrating the implementation of monitor templates into the existing framework, using the control flow abstractions provided by EBA. In order to present how monitor templates are instantiated based on the given control flow, it is necessary to describe the control flow abstractions. EBA generates a tree structure of the input, modeling statements as so-called \texttt{step}s. A path in this tree structure models a possible execution path, with each \texttt{step} in a path containing information about the modelled statements. The implementation of \texttt{check}, initiating the generation of the control flow abstraction using EBA can be seen in Figure \ref{check-implementation}. 
+
+\todo{Discuss proper use of code section(s) in meeting.}
 \begin{figure}[H]
     \centering
     \begin{minted}{ocaml}
@@ -38,7 +41,7 @@ In order to implement a new bug checker into EBA, the implementation has to conf
     \label{check-implementation}
 \end{figure}
 
-\noindent Nodes in the CFG structure provided by EBA be one of four different types, each representing the input statement. Nodes representing if-statements in the source input result are \textit{If}-nodes in the tree, containing two branches. If an If-node is discovered, the two branches from that node are explored and the union of the resulting states is found. Nodes representing the end of a branch are \textit{Nil}-nodes in the tree. Nodes representing assumptions made after if-statements are either true or false are \textit{Assume}-nodes, but are not used in this work since all branches are explored. Finally all other statements are represented as \textit{Seq}-nodes, which contain information about the shapes and effects of statements. An illlustration of these types can be seen in Figure \ref{cfg-nodes}. These \textit{Seq}-nodes are of interest, since they allow analysis on effects.  
+\noindent Nodes in the CFG structure provided by EBA can be of one of four different types, each representing the input statement. Nodes representing if-statements in the source input result are \textit{If}-nodes in the tree, containing two branches. If an If-node is discovered, the two branches from that node are explored and the union of the resulting states is found. Nodes representing the end of a branch are \textit{Nil}-nodes in the tree. Nodes representing assumptions made after if-statements are either true or false are \textit{Assume}-nodes, but are not used in this work since all branches are explored. Finally all other statements are represented as \textit{Seq}-nodes, which contain information about the shapes and effects of statements. An illlustration of these types can be seen in Figure \ref{cfg-nodes}. These \textit{Seq}-nodes are of interest, since they allow analysis on effects.  
 
 \begin{figure}[H]
     \centering
@@ -47,7 +50,33 @@ In order to implement a new bug checker into EBA, the implementation has to conf
     \label{cfg-nodes}
 \end{figure}
 
-\noindent Seq-nodes contain a \textit{step} which models a statement in the input source code. When a \textit{Seq}-node is discovered in the tree, the --- possibly multiple --- effects of its containing step are explored. An illustration of this node can be seen in Figure \ref{cfg-step}. These possibly multiple effects raise a problem; since a given step contains a set of effects, the order of these effects are therefore not known and all orders of executing these effects must be explored. This must be done since a given ordering of effects can lead to a bug, while a different order might not. All permutations of the set of effects must therefore be found and mapped to a given region, while also preserving the information of the other permutations for that given region. Furthermore, the transition function of the monitor automata must be evaluated on the current input, resulting in a new state of that automata which again must also be stored for that region.
+\noindent Seq-nodes contain a \textit{step} which models a statement in the input source code. When a \textit{Seq}-node is discovered in the tree, the --- possibly multiple --- effects of its containing step are explored. An illustration of this node can be seen in Figure \ref{cfg-step}. These possibly multiple effects raise a problem; since a given step contains a set of effects, the order of these effects are therefore not known and all orders of executing these effects must be explored. This must be done since a given ordering of effects can lead to a bug, while a different order might not. The reader is encouraged to examine the example given in Figure \ref{multiple-region-example} to understand why this is the case. In the example, two locks are taken on two different regions and these regions are then both unlocked in a called function. One of the regions is then unlocked again following the function call, leading to a double-unlock bug. If monitors are not instantiated for each region, an error state would occur when analyzing the effects of the function call even though the bug is in fact not found within the function, but just after the function. 
+
+\begin{figure}[H]
+    \centering
+    \begin{minted}{c}
+    int lock1;
+    int lock2;
+
+    void unlock_func()
+    {
+        _spin_unlock(&lock1);
+        _spin_unlock(&lock2);
+    }
+
+    int main()
+    {
+        _spin_lock(&lock1);
+        _spin_lock(&lock2);
+        unlock_func();
+        _spin_unlock(&lock2);
+    }
+    \end{minted}
+    \caption{An example of multiple locks happening on different regions, leading to a bug on one region, but not the other.}
+    \label{multiple-region-example}
+\end{figure}
+
+All permutations of the set of effects must therefore be found and mapped to a given region, while also preserving the information of the other permutations for that given region. Furthermore, the transition function of the monitor automata must be evaluated on the current input, resulting in a new state of that automata which again must also be stored for that region.
 
 \begin{figure}[H]
     \centering
@@ -56,7 +85,7 @@ In order to implement a new bug checker into EBA, the implementation has to conf
     \label{cfg-step}
 \end{figure}
 
-\noindent In order to accomplish this, the current state of the monitor monitoring a region needs to be copied and stored in the map for each permutation found for a given set of effects in order to explore all possible effect orderings. These copies are then stored in the map for the given region and future effects on that region are then applied on these copies. An illustration of this copying on two permutations followed by another effect happening on the same region can be seen in Figure \ref{permutation-copy}, leading to a possible double-unlock bug.
+\noindent In order to accomplish this, the current state of the monitor monitoring a region needs to be copied and applied as the current state of the monitor for each permutation found for a given set of effects. \todo{Discuss correctness at meeting.} This is done in order to find all possible states of the monitor when given all effect orderings as input. The resulting states are then stored in the map for the given region, and future effects on that region are then applied on these states. An illustration of this copying on two permutations followed by another effect happening on the same region can be seen in Figure \ref{permutation-copy}, leading to a possible double-unlock bug.
 
 \begin{figure}[H]
     \centering
@@ -67,7 +96,11 @@ In order to implement a new bug checker into EBA, the implementation has to conf
 
 \noindent This map can be formalized as the function $m: region \rightarrow { checker\_state }$ where $ checker\_state $ is the internal state of the monitor automata. Using this map it is possible to apply each permutation of effects and fold this list of effects into a modified map with possibly altered automata states for their corresponding regions. The resulting map can be explored in order to find any accepting states of monitor automata for a given region. 
 
-\newpar Monitors need to be instantiated whenever a new region is encountered and stored in the map. Given that the map maps a region to the state of monitor automatas, the length of the map will never be larger than the number of regions in the input source file. The size of the set of possible monitor automata states for a given region depends on the effects of a statement operating on a given region. Given a large number of possible effects of a statement the resulting set of permutations of these effects will naturally grow. A set of $N$ effects will result in $N!$ permutations; in other words, the number of monitor automata states for a given region will therefore in the worst case be $|\mathit{effects}|!$. In practice, program points lead to a small number of effects and this has not posed a problem during testing. Effects are only applied to the monitors monitoring a region if the alphabet of the monitor in question accepts this effect, in other words utilizing the product construction inference rules defined in Chapter \ref{monitor-template-section}. The implementation of the exploration of control flow, finding states and adding these states to the map can be seen in Figure \ref{explore_tree-implementation}.
+\newpar Monitors need to be instantiated whenever a new region is encountered and stored in the map. Given that the map maps a region to the state of monitor automatas, the length of the map will never be larger than the number of regions in the input source file. The size of the set of possible monitor automata states for a given region depends on the effects of a statement operating on a given region, though this can be improved by filtering effects, as we will see shortly. 
+
+\newpar Given a large number of possible effects of a statement the resulting set of permutations of these effects will naturally grow. A set of $N$ effects will result in $N!$ permutations; in other words, the number of monitor states for a given region will therefore in the worst case be $|\mathit{effects}|!$. This $N$ can be reduced by only applying effects to monitors which are of interest, namely effects which are in the alphabet, $\sum$, of the monitor template definition. Filtering effects caused by a program point to only include elements in $\sum$ greatly reduces the number of monitors states, though this is inherently dependent on the template definition. Definitions with a restricted alphabet will perform better. Effects are only applied to the monitors monitoring a region if the alphabet of the monitor in question accepts this effect, in other words utilizing the product construction inference rules defined in Chapter \ref{monitor-template-section}. 
+
+\newpar The implementation of the exploration of control flow, finding states and adding these states to the map can be seen in Figure \ref{explore_tree-implementation}. This \texttt{explore\_paths} function takes a control flow graph generated by EBA and an initially empty map as input parameters and results in a map of all inferred regions and the resulting monitor states for these regions. This is accomplished by recursively exploring the tree-like control flow graph and depending on the encountered program point, applies the possible effects of the program point on the transition function of the instantiated monitor, \texttt{A}. The resulting state(s) are then added to the map. 
 
 \begin{figure}[H]
     \centering
@@ -109,7 +142,7 @@ In order to implement a new bug checker into EBA, the implementation has to conf
             Map.union true_branch false_branch
         | Nil -> map
     \end{minted}
-    \caption{The implementation of the EBA control flow while keeping track of states for regions.}
+    \caption{The implementation of the EBA control flow while keeping track of states for regions. This function takes a control flow graph generated by EBA and an initially empty map as input parameters and results in a map of all inferred regions and the resulting monitor states for these regions.}
     \label{explore_tree-implementation}
 \end{figure}
 
