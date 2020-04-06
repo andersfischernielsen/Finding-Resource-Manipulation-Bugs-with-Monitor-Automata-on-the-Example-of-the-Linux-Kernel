@@ -192,7 +192,6 @@ The signature of monitor automata must be implemented in order to use the bug ch
     \centering
     \begin{minted}{ocaml}
         type state = 
-            | Initial
             | Locked
             | Unlocked
             | Error of Effects.e
@@ -218,12 +217,6 @@ The signature of monitor automata must be implemented in order to use the bug ch
             let next new_state = with_previous previous new_state step in
             let previous_state = previous.current_state in 
             match previous_state with 
-            | Initial -> 
-                (match input with 
-                | Mem(Lock, _)      -> next Locked
-                | Mem(Unlock, _)    -> next Unlocked
-                | _                 -> next previous_state
-                )
             | Unlocked ->
                 (match input with 
                 | Mem(Lock, _)      -> next Locked
