@@ -1,8 +1,12 @@
 \section{Finding Double-Unlock Bugs in Practice}
-This section will detail how the abstractions defined previously are integrated into the EBA framework in order to explore the control flow graph of input programs while generating the product of the control flow and monitor automata in order to detect possible bugs. 
+\label{implementation}
+
+\noindent This section will detail how the abstractions defined previously are integrated into the EBA framework in order to explore the control flow graph of input programs while generating the product of the control flow and monitor automata in order to detect possible bugs. 
 
 \subsection{Integration into EBA}
-In order to implement a new bug checker in EBA, the implementation has to conform to the structure set up by the framework of how these checkers should behave. Furthermore, signatures must be defined for these checkers in order to allow the framework to instantiate these checkers on the inferred regions of an input program. This section will describe how this has been accomplished.  
+\label{integration-into-eba}
+
+\noindent In order to implement a new bug checker in EBA, the implementation has to conform to the structure set up by the framework of how these checkers should behave. Furthermore, signatures must be defined for these checkers in order to allow the framework to instantiate these checkers on the inferred regions of an input program. This section will describe how this has been accomplished.  
 
 \newpar The EBA framework allows specifying checker signatures whose implementations are executed on a given input source file. Checker signature implementations instantiate a given bug checker for a given bug type and the internal logic of the bug checker is run by the framework. 
 
@@ -22,15 +26,22 @@ In order to implement a new bug checker in EBA, the implementation has to confor
     \centering
     \begin{minted}{ocaml}
         let check file declaration =
-            let variable_info = Cil.(declaration.svar) in
-            let _, global_function = Option.get(AFile.find_fun file variable_info) in
+        let variable_info = Cil.(declaration.svar) in
+        match variable_info.vstorage with 
+        | Static -> L.of_list []
+        | _ ->
+            let _, global_function = Option.get(AFile.find_fun 
+                file variable_info) in
             let path_tree = paths_of global_function in
-            let results = explore_paths path_tree Map.empty in 
+            let results = explore_paths global_function path_tree 
+                Map.empty true in 
             let states = Map.values results in
-            let matches = Enum.fold (fun acc m -> (List.filter A.is_accepting m) @ acc) 
-                [] states in
+            let matches = Enum.fold (fun acc m -> 
+                (List.filter A.is_accepting m) @ acc) [] states in
             let matches_reversed = List.rev matches in 
-            let pp = List.map (fun m -> A.pp_checker_state m) matches_reversed in
+            let function_name = Cil.(variable_info.vname) in 
+            let pp = List.map (fun m -> A.pp_checker_state m function_name) 
+                matches_reversed in
             let pp_list = List.map (fun m -> PP.to_string m) pp in
             L.of_list pp_list
     \end{minted}
@@ -38,7 +49,7 @@ In order to implement a new bug checker in EBA, the implementation has to confor
     \label{check-implementation}
 \end{figure}
 
-\noindent Nodes in the CFG structure provided by EBA can be of one of four different types, each representing the input statement. Nodes representing if-statements in the source input result are \textit{If}-nodes in the tree, containing two branches. If an If-node is discovered, the two branches from that node are explored and the union of the resulting states is found. Nodes representing the end of a branch are \textit{Nil}-nodes in the tree. Nodes representing assumptions made after if-statements are either true or false are \textit{Assume}-nodes, but are not used in this work since all branches are explored. Finally all other statements are represented as \textit{Seq}-nodes, which contain information about the shapes and effects of statements. An illlustration of these types can be seen in Figure \ref{cfg-nodes}. These \textit{Seq}-nodes are of interest, since they allow analysis on effects.  
+\newpar Nodes in the CFG structure provided by EBA can be of one of four different types, each representing the input statement. Nodes representing if-statements in the source input result are \textit{If}-nodes in the tree, containing two branches. If an If-node is discovered, the two branches from that node are explored and the union of the resulting states is found. Nodes representing the end of a branch are \textit{Nil}-nodes in the tree. Nodes representing assumptions made after if-statements are either true or false are \textit{Assume}-nodes, but are not used in this work since all branches are explored. Finally all other statements are represented as \textit{Seq}-nodes, which contain information about the shapes and effects of statements. An illlustration of these types can be seen in Figure \ref{cfg-nodes}. These \textit{Seq}-nodes are of interest, since they allow analysis on effects.  
 
 \begin{figure}[H]
     \centering
@@ -47,7 +58,7 @@ In order to implement a new bug checker in EBA, the implementation has to confor
     \label{cfg-nodes}
 \end{figure}
 
-\noindent Seq-nodes contain a \textit{step} which models a statement in the input source code. When a \textit{Seq}-node is discovered in the tree, the --- possibly multiple --- effects of its containing step are explored. An illustration of this node can be seen in Figure \ref{cfg-step}. These possibly multiple effects raise a problem; since a given step contains a set of effects, the order of these effects are therefore not known and all orders of executing these effects must be explored. This must be done since a given ordering of effects can lead to a bug, while a different order might not. The reader is encouraged to examine the example given in Figure \ref{multiple-region-example} to understand why this is the case. In the example, two locks are taken on two different regions and these regions are then both unlocked in a called function. One of the regions is then unlocked again following the function call, leading to a double-unlock bug. If monitors are not instantiated for each region, an error state would occur when analyzing the effects of the function call even though the bug is in fact not found within the function, but just after the function. 
+\newpar Seq-nodes contain a \textit{step} which models a statement in the input source code. When a \textit{Seq}-node is discovered in the tree, the --- possibly multiple --- effects of its containing step are explored. An illustration of this node can be seen in Figure \ref{cfg-step}. These possibly multiple effects raise a problem; since a given step contains a set of effects, the order of these effects are therefore not known and all orders of executing these effects must be explored. This must be done since a given ordering of effects can lead to a bug, while a different order might not. The reader is encouraged to examine the example given in Figure \ref{multiple-region-example} to understand why this is the case. In the example, two locks are taken on two different regions and these regions are then both unlocked in a called function. One of the regions is then unlocked again following the function call, leading to a double-unlock bug. If monitors are not instantiated for each region, an error state would occur when analyzing the effects of the function call even though the bug is in fact not found within the function, but just after the function. 
 
 \begin{figure}[H]
     \centering
@@ -82,7 +93,7 @@ All permutations of the set of effects must therefore be found and mapped to a g
     \label{cfg-step}
 \end{figure}
 
-\noindent In order to accomplish this, the current state of the monitor monitoring a region needs to be copied and applied as the current state of the monitor for each permutation found for a given set of effects. \todo{Discuss correctness at meeting.} This is done in order to find all possible states of the monitor when given all effect orderings as input. The resulting states are then stored in the map for the given region, and future effects on that region are then applied on these states. An illustration of this copying on two permutations followed by another effect happening on the same region can be seen in Figure \ref{permutation-copy}, leading to a possible double-unlock bug.
+\newpar In order to accomplish this, the current state of the monitor monitoring a region needs to be copied and applied as the current state of the monitor for each permutation found for a given set of effects. \todo{Discuss correctness at meeting.} This is done in order to find all possible states of the monitor when given all effect orderings as input. The resulting states are then stored in the map for the given region, and future effects on that region are then applied on these states. An illustration of this copying on two permutations followed by another effect happening on the same region can be seen in Figure \ref{permutation-copy}, leading to a possible double-unlock bug.
 
 \begin{figure}[H]
     \centering
@@ -91,7 +102,7 @@ All permutations of the set of effects must therefore be found and mapped to a g
     \label{permutation-copy}
 \end{figure}
 
-\noindent This map can be formalized as the function $m: region \rightarrow { checker\_state }$ where $ checker\_state $ is the internal state of the monitor automata. Using this map it is possible to apply each permutation of effects and fold this list of effects into a modified map with possibly altered automata states for their corresponding regions. The resulting map can be explored in order to find any accepting states of monitor automata for a given region. 
+\newpar This map can be formalized as the function $m: region \rightarrow { checker\_state }$ where $ checker\_state $ is the internal state of the monitor automata. Using this map it is possible to apply each permutation of effects and fold this list of effects into a modified map with possibly altered automata states for their corresponding regions. The resulting map can be explored in order to find any accepting states of monitor automata for a given region. 
 
 \newpar Monitors are instantiated whenever a new region is encountered and are then stored in this map. If a given region is already present in the map, then the current state of the monitor(s) monitoring the region are applied on the transition function of the monitor(s). If the region is not already present in the map, a monitor is instantiated for each effect happening in the program point where this region was encountered. Given that the map maps a region to the state of monitor automatas, the length of the map will never be larger than the number of regions in the input source file. The size of the set of possible monitor automata states for a given region depends on the effects of a statement operating on a given region, though this can be improved by filtering effects, as we will see shortly. 
 
@@ -143,7 +154,7 @@ All permutations of the set of effects must therefore be found and mapped to a g
     \label{explore_tree-implementation}
 \end{figure}
 
-\noindent When all paths in the CFG tree structure have been explored, the regions which map to accepting states along with their location and traces are extracted from the mapping and presented to the user as possible bugs.  
+\newpar When all paths in the CFG tree structure have been explored, the regions which map to accepting states along with their location and traces are extracted from the mapping and presented to the user as possible bugs.  
 
 \newpar This approach can be described in pseudocode as follows.
 
@@ -184,7 +195,7 @@ All permutations of the set of effects must therefore be found and mapped to a g
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Automata Signatures}
+\subsection{Monitor Signatures}
 
 The signature of monitor automata must be implemented in order to use the bug checker with EBA. The implementation of a given monitor automata is passed to the aforementioned \texttt{Make} module and is then used to evaluate states based on the effects of regions. The signature of the monitor automata specifies a \texttt{state} as a discriminated union type, describing the possible states of the automata as well as a transition function, \texttt{transition}, which takes a previous state of the monitor along with an input effect. 
 
@@ -195,7 +206,7 @@ The signature of monitor automata must be implemented in order to use the bug ch
             | Locked
             | Unlocked
             | Error of Effects.e
-	
+    
         type checker_state = {
             current_state: state;
             trace: step list;
