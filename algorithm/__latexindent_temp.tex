@@ -1,28 +1,28 @@
 \section{An Algorithm for Finding Bugs}
 \todo[inline]{Add section introduction}
 
-\newpar A finite state machine is a quintuple $(\sum, S, s_0, \delta, F)$, where $\sum$ is an alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. I will use such state machines to represent the code under analysis and the properties I wish to detect in input source files. 
+\newpar A finite state machine is a tuple $(\sum, S, s_0, \delta, F)$, where $\sum$ is an alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. I will use such state machines to represent the code under analysis and the properties I wish to detect in input source files. 
 
 \subsection{Monitor Templates}
 \label{monitor-template-section}
 \noindent I use monitor automata to analyze the control flow of a given input source file and detect whether possible bug are present in. A monitor automaton changes state based on what is happening in the control flow of the program. When the automaton reaches an error state, then a possible bug has been discovered. The effect analysis provided by EBA allows monitoring which effects program points have, and monitor automata can then monitor these effects in order to determine whether possible bugs are present. 
 
-\newpar EBA infers what effects happen on a memory region, which is an abstract variable or value in the heap. Monitor automata track effects happening on a given region in order to determine whether they could be manifesting buggy behaviour. Both effects and regions must be tracked. For example, it is common to have multiple locks on different regions within programs, but a lock on one region followed by a lock on a different region does not neccesarily mean that a locking bug is present. Monitor templates are defined formally as follows. 
+\newpar EBA infers what effects happen on a memory region, which is an abstract variable or value in the heap. Monitor automata track effects happening on a given region in order to determine whether they could be manifesting buggy behaviour. Both effects and regions must be tracked. For example, it is common to have multiple locks on different regions within programs, but a lock on one region followed by a lock on a different region does not neccesarily mean that a locking bug is present unless these locks happen consequently on the same region. Monitor templates are defined formally as follows. 
 
-\newpar Given a region variable $\rho$, a monitor template is defined as the tuple $X_\rho (\sum, S, s_0, \delta, \\F, E)$ where $\sum$ is the alphabet of effects registered on memory objects represented by a region $\rho$, $S$ is a finite non-empty set of states, $s_0$ an initial state and an element of $S$, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$, $F$ is the possibly empty set of final states and a subset of $S$, $E$ is the non-empty set of error states, and a subset of $F$. An illustration of such a monitor automaton can be seen in Figure \ref{double-unlock-automata-intro}.
+\newpar Given a region variable $\rho$, a monitor template is defined as the tuple $X_\rho (\sum, S, s_0, \delta, F, E)$ where $\sum$ is the alphabet of effects registered on memory objects represented by a region $\rho$, $S$ is a finite non-empty set of states, $s_0$ an initial state and an element of $S$, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$, $F$ is the non-empty set of final states and a subset of $S$, $E$ is the non-empty set of error states, and a subset of $F$. In other words, $X_\rho (\sum, S, s_0, \delta, F)$ is a finite state machine over regions and effects, augmented with the set of error states $E$. An illustration of such a monitor template can be seen in Figure \ref{double-unlock-automata-intro}.
 
-\newpar From this definition, I distinguish two kinds of monitor templates: \textit{long-term} templates and \textit{short-term} templates. \textit{Short-term} templates will monitor effects happening on a region indefinitely until a final state or error state is reached. \textit{Long-term} templates operate as \textit{short-term} templates, though they only include a single final state, which is the error state. They will therefore monitor indefinititely until only an error-state is found. This distinction is made since early termination of monitors might result in performance improvements in the implementation of these monitors. 
+\newpar From this definition, I distinguish two kinds of monitor templates: \textit{long-term} and \textit{short-term}. \textit{Short-term} templates will monitor effects happening on a region only until a final state or error state is reached. \textit{Long-term} templates operate as \textit{short-term} templates, though they only include a single final state, which is the error state. They will therefore monitor indefinititely until only an error-state is found; no early temrination is possible. This distinction is made since early termination of monitors might result in performance improvements in the implementation of these monitors, since it may especiaally reduce the number of monitors active in the analyzers' memory. 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{algorithm/figures/double-unlock}
-    \caption{An illustration of a monitor automaton.}
+    \caption{An illustration of a monitor template.}
     \label{double-unlock-automata-intro}
 \end{figure}
 
 \newpar I will present several examples of these monitors in the following sections. Though these are examples, they are important since the implementation of the monitors follows these examples. 
 
-\newpar Our monitors operate on the set of possible effects of a statement in the Control-flow Graph. EBA allows defining new effects tracking a host of different operation. In this thesis I will only be using the following effects, defined as $E = \{$\texttt{alloc}, \texttt{free}, \texttt{read}, \texttt{write}, \texttt{uninit}, \texttt{call}, \texttt{lock}, \texttt{unlock}$\}$ by Abal \cite{EffectiveBugFinding}. The effects and what they represent can be seen in table \ref{effect-table}.
+\newpar Our monitors operate on the set of possible effects of a statement in the Control-flow Graph. EBA allows defining new effects tracking a host of different operation. In this thesis I will only be using the following effects, defined as $E = \{$\texttt{alloc}, \texttt{free}, \texttt{read}, \texttt{write}, \texttt{uninit}, \texttt{call}, \texttt{lock}, \texttt{unlock}$\}$ by Abal \cite{EffectiveBugFinding}. The effects and what they represent can be seen in Table \ref{effect-table}.
 
 \begin{table}[H]
     \centering
@@ -40,97 +40,98 @@
     \label{effect-table}
 \end{table}
 
-\subsubsection*{Double-lock monitor automata}
+\subsubsection*{Short-term Double-lock Monitor Template}
+
+\todo[inline]{Define this for short term double lock, not unlock.}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{algorithm/figures/double-lock-short}
-    \caption{An illustration of a double-lock monitor automata.}
-    \label{double-lock-automata-short}
+    \includegraphics[width=0.5\textwidth]{algorithm/figures/double-lock-short-term}
+    \caption{An illustration of a short-term double-lock monitor template.}
+    \label{double-lock-automata-short-term}
 \end{figure}
 
-A double-unlock monitor detects two consecutive locks on a memory location with no unlock in between them, leading to an infinite spinlock. Given a region $\rho$, a double-lock monitor automata is defined as the quintuple $(\sum, S, s_0, \delta, E, \\F)$ where: 
+A double-lock monitor detects two consecutive locks on a memory location with no unlock in between them leading to an infinite spinlock. Given a region $\rho$, a double-lock monitor template is defined as the tuple $(\sum, S, s_0, \delta, E, F)$ where: 
 
 \begin{itemize}
-    \item $\sum = \{\texttt{lock}_\rho, \texttt{unlock}_\rho\}$, a subset of $E$
-    \item $S = \{ locked_\rho, unlocked_\rho, error_\rho, terminate \}$
+    \item $\sum = \{lock_\rho, unlock_\rho\}$, a subset of $E$
+    \item $S = \{ locked_\rho, unlocked_\rho, error_\rho \}$
     \item $s_0 = unlocked_\rho$ 
-    \item $\delta =$ the relation $\{(unlocked_\rho, \texttt{lock}_\rho, locked_\rho), (locked_\rho, \texttt{unlock}_\rho, terminate), \\
-    (locked_\rho, \texttt{lock}_\rho, error_\rho), (unlocked_\rho, \texttt{unlock}_\rho, unlocked_\rho)\}$ 
-    \item $E = error_\rho$  
-    \item $F = terminate$
+    \item $\delta =$ the relation $\{(unlocked_\rho, lock_\rho, locked_\rho), (locked_\rho, unlock_\rho, unlocked_\rho), \\
+    (locked_\rho, lock_\rho, error_\rho), (unlocked_\rho, unlock_\rho, unlocked_\rho)\}$ 
+    \item $E = \{ error_\rho \}$  
+    \item $F = \{ unlocked_\rho, error_\rho \}$
 \end{itemize}
 
-\noindent It is worth noting that this is a \textit{short-term} monitor, indicated by $F$. This monitor will therefore terminate when encountering a legal use of locks followed by an unlock. An illustration of this monitor automata can be seen in Figure \ref{double-lock-automata-short}. 
+\noindent It is worth noting that this is a \textit{short-term} monitor, as $F \neq E$. This monitor will therefore terminate when encountering a legal use of locks followed by an unlock. An illustration of this monitor template can be seen in Figure \ref{double-lock-automata-short-term}. 
 
-\subsubsection*{Double-unlock monitor automata}
+\subsubsection*{Long-term Double-unlock Monitor Template}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{algorithm/figures/double-unlock}
-    \caption{An illustration of a double-unlock monitor automata.}
+    \caption{An illustration of a long-term double-unlock monitor template.}
     \label{double-unlock-automata}
 \end{figure}
 
-A double-unlock monitor detects two consecutive unlocks on a memory location with no lock in between them, leading to undefined behaviour. Given a region $\rho$, a double-unlock monitor automata is defined as the sextuple $(\sum, S, s_0, \delta, E, \\F)$ where: 
+A double-unlock monitor detects two consecutive unlocks on a memory location with no lock in between them, leading to undefined behaviour. Given a region $\rho$, a double-unlock monitor template is defined as the tuple $(\sum, S, s_0, \delta, E, F)$ where: 
 
 \begin{itemize}
-    \item $\sum = \{\texttt{unlock}_\rho, \texttt{lock}_\rho\}$, a subset of $E$
+    \item $\sum = \{unlock_\rho, lock_\rho\}$, a subset of $E$
     \item $S = \{ locked_\rho, unlocked_\rho, error_\rho \}$
     \item $s_0 = unlocked_\rho$ 
-    \item $\delta =$ the relation $\{(locked_\rho, \texttt{unlock}_\rho, unlocked_\rho), (locked_\rho, \texttt{lock}_\rho, locked_\rho), \\
-        (unlocked_\rho, \texttt{lock}_\rho, locked_\rho), (unlocked_\rho, \texttt{unlock}_\rho, error_\rho)\}$ 
-    \item $E = error_\rho$
+    \item $\delta =$ the relation $\{(locked_\rho, unlock_\rho, unlocked_\rho), (locked_\rho, lock_\rho, locked_\rho), \\
+        (unlocked_\rho, lock_\rho, locked_\rho), (unlocked_\rho, unlock_\rho, error_\rho)\}$ 
+    \item $E = \{ error_\rho \}$
     \item $F = E$
 \end{itemize}
 
-An illustration of this monitor automata can be seen in Figure \ref{double-unlock-automata}. 
+\noindent It is worth noting that this is a \textit{long-term} monitor, as $F = E$. An illustration of this monitor template can be seen in Figure \ref{double-unlock-automata}. 
 
-\subsubsection*{Double-free monitor automata}
+\subsubsection*{Long-term Double-free Monitor Template}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{algorithm/figures/double-free}
-    \caption{An illustration of a double-free monitor automata.}
+    \caption{An illustration of a long-term double-free monitor template.}
     \label{double-free-automata}
 \end{figure}
 
-A double-free monitor detects two consecutive frees on a memory location with no allocation in between them, potentially leading to modification of unexpected memory locations. Given a region $\rho$, a double-free monitor automata is defined as the quintuple $(\sum, S, s_0, \delta, E, \\F)$ where: 
+A double-free monitor detects two consecutive frees on a memory location with no allocation in between them, potentially leading to modification of unexpected memory locations. Given a region $\rho$, a double-free monitor template is defined as the tuple $(\sum, S, s_0, \delta, E, \\F)$ where: 
 
 \begin{itemize}
-    \item $\sum = \{\texttt{free}_\rho, \texttt{alloc}_\rho\}$, a subset of $E$
+    \item $\sum = \{free_\rho, alloc_\rho\}$, a subset of $E$
     \item $S = \{ allocated_\rho, freed_\rho, error_\rho \}$
     \item $s_0 = freed_\rho$ 
-    \item $\delta =$ the relation $\{(freed_\rho, \texttt{alloc}_\rho, allocated_\rho), (allocated_\rho, \texttt{free}_\rho, freed_\rho), \\
-    (freed_\rho, \texttt{free}_\rho, error_\rho), (allocated_\rho, \texttt{alloc}_\rho, allocated_\rho)\}$ 
-    \item $E = error_\rho$  
+    \item $\delta =$ the relation $\{(freed_\rho, alloc_\rho, allocated_\rho), (allocated_\rho, free_\rho, freed_\rho), \\
+    (freed_\rho, free_\rho, error_\rho), (allocated_\rho, alloc_\rho, allocated_\rho)\}$ 
+    \item $E = \{ error_\rho \}$  
     \item $F = E$
 \end{itemize}
 
-An illustration of this monitor automata can be seen in Figure \ref{double-free-automata}. 
+An illustration of this monitor template can be seen in Figure \ref{double-free-automata}. 
 
-\subsubsection*{Use-before-init monitor automata}
+\subsubsection*{Short-term Use-before-init Monitor Template}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{algorithm/figures/use-before}
-    \caption{An illustration of a use-before-init monitor automata.}
+    \caption{An illustration of a short-term use-before-init monitor template.}
     \label{use-before-automata}
 \end{figure}
 
-A use-before init monitor detects usage of a memory location before the location has been initialized, possibly leaving the resource in an unexpected state when it is accessed or used. Given a region $\rho$, a use-before-init monitor automata is defined as the quintuple $(\sum, S, s_0, \delta, E, \\F)$ where: 
+A use-before init monitor detects usage of a memory location before the location has been initialized, possibly leaving the resource in an unexpected state when it is accessed or used. Given a region $\rho$, a use-before-init monitor template is defined as the tuple $(\sum, S, s_0, \delta, E, \\F)$ where: 
 
 \begin{itemize}
-    \item $\sum = \{\texttt{read}_\rho, \texttt{init}_\rho\}$, a subset of $E$
-    \item $S = \{ unread_\rho, initialized_\rho, error_\rho \}$
-    \item $s_0 = unused_\rho$ 
-    \item $\delta =$ the relation $\{(unread_\rho, \texttt{init}_\rho, initialized_\rho), (initialized_\rho, \texttt{uninit}_\rho, unread_\rho), \\
-    (unread_\rho, \texttt{read}_\rho, error_\rho), (initialized_\rho, \texttt{init}_\rho, initialized_\rho)\}$ 
-    \item $E = error_\rho$  
-    \item $F = E$
+    \item $\sum = \{read_\rho, init_\rho\}$, a subset of $E$
+    \item $S = \{ uninitialized_\rho, initialized_\rho, error_\rho \}$
+    \item $s_0 = uninitialized_\rho$ 
+    \item $\delta =$ the relation $\{(uninitialized_\rho, init_\rho, initialized_\rho), (uninitialized_\rho, read_\rho, error_\rho)\}$ 
+    \item $E = \{ error_\rho \}$  
+    \item $F = \{ error_\rho, initialized_\rho \}$
 \end{itemize}
 
-An illustration of this monitor automata can be seen in Figure \ref{use-before-automata}. 
+An illustration of this monitor template can be seen in Figure \ref{use-before-automata}. 
 
 \subsection{Control Flow}
 
