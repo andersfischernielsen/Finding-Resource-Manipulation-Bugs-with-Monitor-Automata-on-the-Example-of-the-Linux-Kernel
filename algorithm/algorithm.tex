@@ -1,5 +1,5 @@
 \section{An Algorithm for Finding Bugs}
-\todo[inline]{Add section introduction}
+In order to detect resource manipulation bugs, I will present an algorithm for detecting these bugs utilizing the definitions presented by Abal et. al \cite{EffectiveBugFinding}. This section will present my definitions of \textit{monitor templates} as finite state machines operating on \textit{effects} on \textit{regions}, allowing the definition of bug behaviour and the detection of such behaviour. 
 
 \newpar A finite state machine is a tuple $(\sum, S, s_0, \delta, F)$, where $\sum$ is an alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. I will use such state machines to represent the code under analysis and the properties I wish to detect in input source files. 
 
