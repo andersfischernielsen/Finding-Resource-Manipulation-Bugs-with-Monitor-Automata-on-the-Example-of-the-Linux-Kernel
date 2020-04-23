@@ -1,5 +1,5 @@
 \section{Building Upon the EBA Framework}
-The EBA framework provides \textit{shape-and-effect inference} and allows extracting an \textit{effect-annotated control flow graph} from a Linux kernel program. The annotated control flow graph can be statically analyzed in order to find possible bugs in the given program. Figure \ref{initial-bug-visualisation} shows an example of a bug found in the Linux kernel\footnote{This bug was patched in commit \href{https://github.com/torvalds/linux/commit/4dd75b33}{\texttt{4dd75b33}}.} and the data types provided by the framework. These data types have been used in this thesis to develop new resource manipulation bug checkers.
+The EBA framework provides \textit{shape-and-effect inference} and allows extracting an \textit{effect-annotated control flow graph} (effect-CFG) from a Linux kernel program. The annotated control flow graph can be statically analyzed in order to find possible bugs in the given program. Figure \ref{initial-bug-visualisation} shows an example of a bug found in the Linux kernel\footnote{This bug was patched in commit \href{https://github.com/torvalds/linux/commit/4dd75b33}{\texttt{4dd75b33}}.} and the data types provided by the framework. These data types have been used in this thesis to develop new resource manipulation bug checkers. This section will explain the definitions by Abal et. al. \cite{Abal2017EffectiveBF} which are built upon in this thesis in order to develop new bug checkers. 
 
 \begin{figure}[H]
 \centering
@@ -28,7 +28,7 @@ void ubifs_delete_orphan(struct ubifs_info *c, ino_t inum)
 \begin{minipage}{0.45\textwidth}
     \includegraphics[width=\textwidth]{background/figures/annotated-cfg}
 \end{minipage}
-\caption{An illustration of a double-unlock bug (\texttt{4dd75b33}) found in the Linux kernel and the analysis data types provided by EBA. The relevant code is shown on the left-hand side and on the right-hand side is the effect-CFG with lock and unlock effects provided by EBA. The numbers next to CFG nodes show the corresponding line numbers.}
+\caption{An illustration of a double-unlock bug (\texttt{4dd75b33}) found in the Linux kernel and the analysis data types provided by EBA. The relevant code is shown on the left-hand side and on the right-hand side is the \textit{effect-CFG} with \textit{lock} and \textit{unlock effects} provided by EBA. The numbers next to CFG nodes show the corresponding line numbers.}
 \label{initial-bug-visualisation}
 \end{figure}
 
@@ -112,7 +112,13 @@ Abal et. al. present inference rules $\vdash_{L} \subseteq \text { ENV } \times 
 \end{equation*}
 \todo[inline]{Explaing the above in WORDS.}
 
-\newpar The full inference system is presented in the work by Abal et. al \cite{Abal2017EffectiveBF}, $\text{FETCH}$ and $\text{WRITE}$ are merely presented here as examples of effect inference. Abal et. al. axiomize the behaviour of certain operations, $f$, with a signature, $Z_{i}^{L} \stackrel{\varphi}{\rightarrow} Z_0$. The axiom specifies shapes of the input arguments expected by the function, $Z_{i}^{L}$, the shape of the output, $Z_0$, and the resulting effects, $\varphi$. The authors present an example of two axioms for locking and unlocking functions found within the Linux kernel. 
+\newpar The full inference system is presented in the work by Abal et. al \cite{Abal2017EffectiveBF}, $\text{FETCH}$ and $\text{WRITE}$ are merely presented here as examples of effect inference. 
+
+$\text{[FETCH]}$ will fetch a value in a $\text{ref}_\rho$ by the use of the bang operator, $!L$, and give an object of a shape, $Z$, leading to the effect $\text{read}_\rho$ being added to the set of effects, $\varphi$. Applying $\text{[FETCH]}$ will result in an l-value, which under the environment has shape $\text{ref}_\rho Z$ with the side effects $\varphi$.  
+
+$\text{[ASSIGN]}$ will evaluate both expressions $E_1$ and $E_2$, resulting in effects for both $E_1$, $E_2$ as well as existing effects along with the $\text{write}_\rho$ effect being combined into the effects set. The expression $E_1$ will be written to the location $L$. The left and right-hand sides of the expression, $L$ and $E_1$ must be of the same shape, $Z$, while the result of evaluating $E_2$ can be of a different shape, $Z'$.
+
+\newpar Abal et. al. axiomize the behaviour of certain operations, $f$, with a signature, $Z_{i}^{L} \stackrel{\varphi}{\rightarrow} Z_0$. The axiom specifies shapes of the input arguments expected by the function, $Z_{i}^{L}$, the shape of the output, $Z_0$, and the resulting effects, $\varphi$. The authors present an example of two axioms for locking and unlocking functions found within the Linux kernel. 
 
 \begin{equation*}
 \begin{aligned}
