@@ -1,16 +1,49 @@
-\section{Background}
-The EBA framework is built upon in this thesis, though generally seen as a black box. Not all of EBA can be seen as a black box, as an understanding of certain definitions described by Abal et. al. \cite{Abal2017EffectiveBF} is required to see how we build upon the existing work. Three main definitions are of note here, namely \textit{shapes}, \textit{regions} and \textit{effects}. This chapter will provide a summary of the definitions we also use in this thesis to define our work. 
+\section{Building Upon the EBA Framework}
+The EBA framework provides \textit{shape-and-effect inference} and allows extracting an \textit{effect-annotated control flow graph} from a Linux kernel program. The annotated control flow graph can be statically analyzed in order to find possible bugs in the given program. Figure \ref{initial-bug-visualisation} shows an example of a bug found in the Linux kernel\footnote{This bug was patched in commit \href{https://github.com/torvalds/linux/commit/4dd75b33}{\texttt{4dd75b33}}.} and the data types provided by the framework. These data types have been used in this thesis to develop new resource manipulation bug checkers.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.4\textwidth}
+    \begin{minted}[fontsize=\scriptsize, breaklines, linenos]{c}
+static void orphan_delete(struct ubifs_info *c, struct ubifs_orphan *orph)
+{
+	if (orph->del) {
+		spin_unlock(&c->orphan_lock);
+		return;
+	}
+	if (orph->cmt) {
+		spin_unlock(&c->orphan_lock);
+		return;
+	}
+}
+
+void ubifs_delete_orphan(struct ubifs_info *c, ino_t inum)
+{
+	orphan_delete(c, orph);
+	spin_unlock(&c->orphan_lock);
+}
+\end{minted}
+\end{minipage}
+\hspace*{0.05\textwidth}
+\begin{minipage}{0.45\textwidth}
+    \includegraphics[width=\textwidth]{background/figures/annotated-cfg}
+\end{minipage}
+\caption{An illustration of a double-unlock bug (\texttt{4dd75b33}) found in the Linux kernel and the analysis data types provided by EBA. The relevant code is shown on the left-hand side and on the right-hand side is the effect-CFG with lock and unlock effects provided by EBA. The numbers next to CFG nodes show the corresponding line numbers.}
+\label{initial-bug-visualisation}
+\end{figure}
+
+\newpar The EBA framework is built upon in this thesis, though it is generally seen as a black box. An understanding of certain definitions described by Abal et. al. \cite{Abal2017EffectiveBF} is required to see how we build upon the existing work. Three main definitions are of note here, namely \textit{shapes}, \textit{regions} and \textit{effects}. EBA employs CIL \cite{cil} as a lightweight intermediate representation lacking implicit type conversions of the C code of the Linux kernel. Abal et. al define a base type system for a smaller language than CIL. This chapter will provide a summary of the definitions we also use in this thesis to define our work. 
 
 \newpar Abal et. al. define the base type system of the \textit{Shape-and-Effect System} as 
 
 \begin{equation*}
 \begin{aligned}
     \text {l-value types } T^{L} \quad &: \quad \text{ ref } T^{R} \quad | \quad \text{ ref } \left(T_{1}^{R} \times \cdots \times T_{n}^{R} \rightarrow T_{0}^{R}\right)\\
-    \text {r-value types } T^{R} \quad &: \quad \texttt {int} \quad | \quad \text{ ptr } T^{L}
+    \text {r-value types } T^{R} \quad &: \quad \texttt{int} \quad | \quad \text{ ptr } T^{L}
 \end{aligned}
 \end{equation*}
 
-\newpar l-value ($T^{L}$) types and r-value ($T^{R}$) types correspond to the left and right side of assignments in C. A reference type, $\texttt{ref} \; T$ represents a memory cell, holding objects of the type $T$. For example, $/texttt{ptr} \texttt{ref} T$ is the current address of the reference for the objects T in memory. 
+\newpar l-value ($T^{L}$) types and r-value ($T^{R}$) types correspond to the left and right side of assignments in C. A reference type, $\texttt{ref} \; T$ represents a memory cell, holding objects of the type $T$. For example, $\text{ptr}\;\text{ref}\;T$ is the current address of the reference for the objects T in memory. 
 
 \begin{equation*}
 \begin{aligned}
@@ -26,6 +59,9 @@ $L_1 := E_2 ;\: E_3$ allows assigning a different value ($E_2$) before evaluatin
 
 \subsection{Regions}
 Regions are an abstract representation of memory, denoted as $\rho$. Variables are names for memory cells, and aliasing --- when multiple variable names actually point to the same memory --- can therefore happen. These possibly aliased memory cells are tracked by the shape-and-effect system as regions. The system will assign a region, $\rho$, to each reference type in the source code, and attempt to detect aliased variables, by unioning these regions when it can no longer distinguish the regions.
+
+\subsection{Effects}
+Effects represent how expressions affect regions. For example, an expression which reads a memory location will have the effect of reading that region. Likewise, expressions writing to memory locations will have the effect of writing to that region. An example of a set of effects is $\varphi = \{read_\rho , read_{\rho'} , write_{\rho'}\}$, where the region $\rho$ is being read and the region $\rho'$ is being both read and written.
 
 \subsection{Shapes}
 \begin{figure}[H]
@@ -49,15 +85,14 @@ Regions are an abstract representation of memory, denoted as $\rho$. Variables a
 \newpar For functions, these function shapes are mapped to \textit{function shapes},
 
 \begin{equation*}
-    \operatorname{ref}_{\rho_{0}}\left(Z_{1}^{L} \times \cdots \times Z_{n}^{L} \stackrel{\varphi}{\rightarrow} Z_{0}^{R}\right).
+    \operatorname{ref}_{\rho_{0}}\left(Z_{1}^{L} \times \cdots \times Z_{n}^{L} \stackrel{\varphi}{\rightarrow} Z_{0}^{R}\right),
 \end{equation*} 
+
+where the memory region $\rho_0$ identifies the function and is used by EBA to keep track of calls to the function.
 
 \newpar Function shapes represent an abstraction of the shapes given to a function as well as the shape of the result of the function. The parameters $Z_{1}^{L} \times \cdots \times Z_{n}^{L}$ correspond to the shapes of parameters the function is given and $Z_{0}^{R}$ is the shape of the result of the function. Since function parameters are stored in stack variables, these parameters are l-value shapes. The \textit{latent effect}, represented as $\stackrel{\varphi}{\rightarrow}$ above represents the effects that may happen when executing the function. These effects are described in the following section. Function shape schemes along with the correlation between types and shapes are described in more detail by Abal et. al. \cite{Abal2017EffectiveBF}. 
 
 \newpar An environment $\Gamma$ maps variables $v$ to their corresponding reference shapes: $\Gamma(v) = ref_\rho Z$. $v$ is effect variables, described in the following. As already mentioned, function shapes are represent effects that may happen when executing a function, but this \textit{may} can be made more concrete using function inlining, in which case the actual effects of calling a function within another function can be inferred concretely. The use of inlining is detailed in Section \ref{implementation}. 
-
-\subsection{Effects}
-Effects represent how expressions affect regions. For example, an expression which reads a memory location will have the effect of reading that region. Likewise, expressions writing to memory locations will have the effect of writing to that region. An example of a set of effects is $\varphi = \{read_\rho , read_{\rho'} , write_{\rho'}\}$, where the region $\rho$ is being read and the region $\rho'$ is being both read and written.
 
 \subsection{Shape-and-effect Inference}
 Abal et. al. present inference rules $\vdash_{L} \subseteq \text { ENV } \times \text { L-VALUE } \times \text { SHAPE } \times \text { EFFECT }$ for \textit{shape-and-effect inference}, which allows determining what shape a given expressions has as well as determining what the effects of evaluation the expression are. This is expressed as the judgments: 
@@ -67,7 +102,7 @@ Abal et. al. present inference rules $\vdash_{L} \subseteq \text { ENV } \times 
     \item $\Gamma \vdash_{E} E: Z \& \varphi$, specifying that under $\Gamma$, the r-value expression $E$ has the shape $Z$ resulting in the effects $\varphi$
 \end{itemize}
 
-\newpar Following the previous examples of effects, the $\text{FETCH}$ and $\text{ASSIGN}$ inference rules allow determining whether an expression will have the effect of reading or writing: 
+\newpar Following the previous examples of read and write effects, two examples of inference rules defined by Abal et. al. are shown in the following corresponding to these effects. The $\text{FETCH}$ and $\text{ASSIGN}$ inference rules allow determining whether an expression will have the effect of reading or writing. 
 
 \begin{equation*}
 \begin{aligned}
@@ -75,8 +110,9 @@ Abal et. al. present inference rules $\vdash_{L} \subseteq \text { ENV } \times 
     &[\text{ASSIGN}] \quad \frac{\Gamma \vdash_{L} L: \mathrm{ref}_{\rho} Z \& \varphi_{1} \quad \Gamma \vdash_{E} E_{1}: Z \& \varphi_{2} \quad \Gamma \vdash_{E} E_{2}: Z' \& \varphi_{3}}{\Gamma \vdash_{E} L:=E_{1} ; E_{2}: Z^{\prime} \& \varphi_{1} \cup \varphi_{2} \cup\left\{w r i t e_{\rho}\right\} \cup \varphi_{3}}
 \end{aligned}
 \end{equation*}
+\todo[inline]{Explaing the above in WORDS.}
 
-Abal et. al. axiomize the behvaiour of certain operations, $f$, with a signature, $Z_{i}^{L} \stackrel{\varphi}{\rightarrow} Z_0$. The axiom specifies shapes of the input arguments expected by the function, $Z_{i}^{L}$, the shape of the output, $Z_0$, and the resulting effects, $\varphi$. The authors present an example of two axioms for locking and unlocking functions found within the Linux kernel: 
+\newpar The full inference system is presented in the work by Abal et. al \cite{Abal2017EffectiveBF}, $\text{FETCH}$ and $\text{WRITE}$ are merely presented here as examples of effect inference. Abal et. al. axiomize the behaviour of certain operations, $f$, with a signature, $Z_{i}^{L} \stackrel{\varphi}{\rightarrow} Z_0$. The axiom specifies shapes of the input arguments expected by the function, $Z_{i}^{L}$, the shape of the output, $Z_0$, and the resulting effects, $\varphi$. The authors present an example of two axioms for locking and unlocking functions found within the Linux kernel. 
 
 \begin{equation*}
 \begin{aligned}
