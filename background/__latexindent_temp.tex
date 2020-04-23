@@ -112,11 +112,9 @@ Abal et. al. present inference rules $\vdash_{L} \subseteq \text { ENV } \times 
 \end{equation*}
 \todo[inline]{Explaing the above in WORDS.}
 
+\newpar $\text{[FETCH]}$ will fetch a value in a $\text{ref}_\rho$ by the use of the bang operator, $!L$, and give an object of a shape, $Z$, leading to the effect $\text{read}_\rho$ being added to the set of effects, $\varphi$. Applying $\text{[FETCH]}$ will result in an \textit{l-value}, which under the environment has the shape $\text{ref}_\rho Z$ with the effects $\varphi$. $\text{[ASSIGN]}$ will evaluate both expressions $E_1$ and $E_2$, resulting in effects for both $E_1$, $E_2$, along with the $\text{write}_\rho$ effect, as well as existing effects being combined into the effects set. The expression $E_1$ will be written to the location $L$. The left and right-hand sides of the expression, $L$ and $E_1$ must be of the same shape, $Z$, while the result of evaluating $E_2$ can be of a different shape, $Z'$.
+
 \newpar The full inference system is presented in the work by Abal et. al \cite{Abal2017EffectiveBF}, $\text{FETCH}$ and $\text{WRITE}$ are merely presented here as examples of effect inference. 
-
-$\text{[FETCH]}$ will fetch a value in a $\text{ref}_\rho$ by the use of the bang operator, $!L$, and give an object of a shape, $Z$, leading to the effect $\text{read}_\rho$ being added to the set of effects, $\varphi$. Applying $\text{[FETCH]}$ will result in an l-value, which under the environment has shape $\text{ref}_\rho Z$ with the side effects $\varphi$.  
-
-$\text{[ASSIGN]}$ will evaluate both expressions $E_1$ and $E_2$, resulting in effects for both $E_1$, $E_2$ as well as existing effects along with the $\text{write}_\rho$ effect being combined into the effects set. The expression $E_1$ will be written to the location $L$. The left and right-hand sides of the expression, $L$ and $E_1$ must be of the same shape, $Z$, while the result of evaluating $E_2$ can be of a different shape, $Z'$.
 
 \newpar Abal et. al. axiomize the behaviour of certain operations, $f$, with a signature, $Z_{i}^{L} \stackrel{\varphi}{\rightarrow} Z_0$. The axiom specifies shapes of the input arguments expected by the function, $Z_{i}^{L}$, the shape of the output, $Z_0$, and the resulting effects, $\varphi$. The authors present an example of two axioms for locking and unlocking functions found within the Linux kernel. 
 
