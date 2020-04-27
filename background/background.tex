@@ -110,7 +110,6 @@ Abal et. al. present inference rules $\vdash_{L} \subseteq \text { ENV } \times 
     &[\text{ASSIGN}] \quad \frac{\Gamma \vdash_{L} L: \mathrm{ref}_{\rho} Z \& \varphi_{1} \quad \Gamma \vdash_{E} E_{1}: Z \& \varphi_{2} \quad \Gamma \vdash_{E} E_{2}: Z' \& \varphi_{3}}{\Gamma \vdash_{E} L:=E_{1} ; E_{2}: Z^{\prime} \& \varphi_{1} \cup \varphi_{2} \cup\left\{w r i t e_{\rho}\right\} \cup \varphi_{3}}
 \end{aligned}
 \end{equation*}
-\todo[inline]{Explaing the above in WORDS.}
 
 \newpar $\text{[FETCH]}$ will fetch a value in a $\text{ref}_\rho$ by the use of the bang operator, $!L$, and give an object of a shape, $Z$, leading to the effect $\text{read}_\rho$ being added to the set of effects, $\varphi$. Applying $\text{[FETCH]}$ will result in an \textit{l-value}, which under the environment has the shape $\text{ref}_\rho Z$ with the effects $\varphi$. $\text{[ASSIGN]}$ will evaluate both expressions $E_1$ and $E_2$, resulting in effects for both $E_1$, $E_2$, along with the $\text{write}_\rho$ effect, as well as existing effects being combined into the effects set. The expression $E_1$ will be written to the location $L$. The left and right-hand sides of the expression, $L$ and $E_1$ must be of the same shape, $Z$, while the result of evaluating $E_2$ can be of a different shape, $Z'$.
 
