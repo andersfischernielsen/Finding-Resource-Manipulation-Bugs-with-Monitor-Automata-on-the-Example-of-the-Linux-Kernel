@@ -93,7 +93,15 @@ All permutations of the set of effects must therefore be found and mapped to a g
     \label{cfg-step}
 \end{figure}
 
-\newpar In order to accomplish this, the current state of the monitor monitoring a region needs to be copied and applied as the current state of the monitor for each permutation found for a given set of effects. \todo{Discuss correctness at meeting.} This is done in order to find all possible states of the monitor when given all effect orderings as input. The resulting states are then stored in the map for the given region, and future effects on that region are then applied on these states. An illustration of this copying on two permutations followed by another effect happening on the same region can be seen in Figure \ref{permutation-copy}, leading to a possible double-unlock bug.
+\newpar In order to accomplish this, the current state of the monitor monitoring a region needs to be copied and applied as the current state of the monitor for each permutation found for a given set of effects. This is done in order to find all possible states of the monitor when given all effect orderings as input. The resulting states are then stored in the map for the given region, and future effects on that region are then applied on these states. An illustration of this copying on two permutations followed by another effect happening on the same region can be seen in Figure \ref{permutation-copy}, leading to a possible double-unlock bug. This provides information regarding the presence of bugs, and inlining can be used after gaining this information in order to determine whether a bug is present. This information presents itself as one of three cases: 
+
+\begin{enumerate}
+    \item All possible orderings lead to all states of monitors being in an error state 
+    \item All possible orderings lead to all states of monitors \underline{not} being in an error state 
+    \item All possible orderings lead to \underline{some} states of monitors being in an error state
+\end{enumerate}
+
+\newpar If the first scenario occurs, a possible bug is definitely present, and exploration can stop. If the second scenario occurs, a possible bug is definitely \underline{not} present, and exploration can continue. If the third scenario occurs, it is unknown whether a possible bug is present, and more information is needed. This extra information is obtained by the inlining the given program point to gain more information regarding the order of effects and applying the effects to the transition function of the monitors once more, making it possible to determine whether a possible bug is present or not. Early use of inlining or inlining of every function leads to the Linux kernel libraries being inlined into the code under analysis, leading to false positives. Inlining is therefore only used when it will benefit the precision of the analysis. 
 
 \begin{figure}[H]
     \centering
