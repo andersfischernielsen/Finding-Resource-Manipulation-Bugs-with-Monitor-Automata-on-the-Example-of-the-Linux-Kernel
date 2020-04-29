@@ -101,14 +101,14 @@ All permutations of the set of effects must therefore be found and mapped to a g
     \item All possible orderings lead to \underline{some} states of monitors being in an error state
 \end{enumerate}
 
-\newpar If the first scenario occurs, a possible bug is definitely present, and exploration can stop. If the second scenario occurs, a possible bug is definitely \underline{not} present, and exploration can continue. If the third scenario occurs, it is unknown whether a possible bug is present, and more information is needed. This extra information is obtained by the inlining the given program point to gain more information regarding the order of effects and applying the effects to the transition function of the monitors once more, making it possible to determine whether a possible bug is present or not. Early use of inlining or inlining of every function leads to the Linux kernel libraries being inlined into the code under analysis, leading to false positives. Inlining is therefore only used when it will benefit the precision of the analysis. 
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{implementation/figures/permutation-copy}
-    \caption{An illustration of how copies of a double-unlock monitor are instantiated given multiple permutations of effect orderings.}
+    \caption{An illustration of the exploration of all effect orderings and how copies of an instantiated double-unlock monitor change state given these effect orderings, leading to a possible bug being discovered in one effect ordering, but not the other.}
     \label{permutation-copy}
 \end{figure}
+
+\newpar If the first scenario occurs, a possible bug is definitely present, and exploration can stop. If the second scenario occurs, a possible bug is definitely \underline{not} present, and exploration can continue. If the third scenario occurs, it is unknown whether a possible bug is present, and more information is needed. This extra information is obtained by the inlining the given program point to gain more information regarding the order of effects and applying the effects to the transition function of the monitors once more, making it possible to determine whether a possible bug is present or not. Early use of inlining or inlining of every function leads to the Linux kernel libraries being inlined into the code under analysis, leading to false positives. Inlining is therefore only used when it will benefit the precision of the analysis. 
 
 \newpar This map can be formalized as the function $m: region \rightarrow { checker\_state }$ where $ checker\_state $ is the internal state of the monitor automata. Using this map it is possible to apply each permutation of effects and fold this list of effects into a modified map with possibly altered automata states for their corresponding regions. The resulting map can be explored in order to find any accepting states of monitor automata for a given region. 
 
