@@ -209,40 +209,32 @@ EBA provides a representation of the control flow of the input source files whic
 
 \begin{itemize}
     \item{
-        $
-            \begin{aligned}[t] 
-                \sum = & \{\mathit{Entry}, \mathit{Nil}, (alloc, \rho), (free, \rho), (read, \rho), \\ 
-                & (write, \rho), (uninit, \rho), (call, \rho), (lock, \rho), (unlock, \rho)\}
-            \end{aligned} 
-        $
+        $ \sum = \{alloc_{\rho_1}, write_{\rho_1}, alloc_{\rho_2}, lock_{\rho_2}, unlock_{\rho_2}\} $
     }
     \item{
         $
             \begin{aligned}[t]
-                S = & \{(allocated, \rho), (freed, \rho), (read, \rho), (written, \rho),\\ 
-                & (uninitialized, \rho), (called, \rho), \\
-                & ((locked, \rho), locked_\rho), ((unlocked, \rho), unlocked_\rho), \\
-                & ((unlocked, \rho), error_\rho), \\
-                & End\}
+                S = & \{\;(1, unlocked), (2, unlocked), (3, unlocked), (4, locked), (5, unlocked), (6, unlocked),\\
+                & (7, unlocked), (8, error), (8, unlocked) \; \}
             \end{aligned}
         $
     }
-    \item $s_0 = Entry$ 
+    \item $s_0 = (1, unlocked)$ 
     \item {
         $
             \begin{aligned}[t]
-            \delta = \text{the relation} \; \{ \; & (Entry, (\texttt{alloc},\rho), (allocated, \rho)), \\ 
-            & (allocated, (\texttt{alloc},\rho), (allocated, \rho)), \\ 
-            & ((allocated, \rho), (\texttt{lock}, \rho), (locked, \rho)), \\
-            & ((locked, \rho), (\texttt{unlock}, \rho), ((unlocked, \rho), unlocked_\rho), \\
-            & (((unlocked, \rho), unlocked_\rho), \texttt{unlock}, ((unlocked, \rho), error_\rho)), \\ 
-            & (((write, \rho), unlocked_\rho), \texttt{write}, ((written, \rho), unlocked_\rho)), \\ 
-            & (((unlocked, \rho), error_\rho), \texttt{Nil}, (End, error_\rho)), \\ 
-            & (((written, \rho), unlocked_\rho), \texttt{Nil}, (End, error_\rho)) \; \}
+            \delta = \text{the relation} \; \{ \; & ((1, unlocked), alloc_{\rho_1}, (2, unlocked)), \\
+            & ((2, unlocked), alloc_{\rho_2}, (3, unlocked)), \\
+            & ((3, unlocked), lock_{\rho_2}, (4, locked)), \\
+            & ((4, locked), unlock_{\rho_2} (5, unlocked)), \\
+            & ((5, unlocked), \emptyset, (6, unlocked)), \\
+            & ((5, unlocked), \emptyset, (7, unlocked)),\\
+            & ((7, unlocked), unlock_{\rho_2}, (8, error)), \\
+            & ((7, unlocked), write_{\rho_1}, (8, unlocked)) \; \}
             \end{aligned}
         $ 
     }
-    \item $F = (End, error_\rho)$  
+    \item $F = (8, error)$  
 \end{itemize}
 
 \noindent This product is illustrated in Figure \ref{cfg_unlock-product}. 
