@@ -1,5 +1,5 @@
 \section{An Algorithm for Finding Bugs}
-In order to detect resource manipulation bugs, I will present an algorithm for detecting these bugs utilizing the definitions presented by Abal et. al \cite{EffectiveBugFinding}. This section will present my definitions of \textit{monitor templates} as finite state machines operating on \textit{effects} on \textit{regions}, allowing the definition of bug behaviour and the detection of such behaviour. 
+In order to detect resource manipulation bugs, I will present an algorithm for detecting these bugs utilizing the region, shape and effect abstractions computed by EBA. I begin with defining \textit{monitor templates} as finite state machines operating on \textit{effects} and \textit{regions}, allowing the definition of bug behaviour and the detection of such behaviour. 
 
 \newpar A finite state machine is a tuple $(\sum, S, s_0, \delta, F)$, where $\sum$ is an alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. I will use such state machines to represent the code under analysis and the properties I wish to detect in input source files. 
 
@@ -7,11 +7,11 @@ In order to detect resource manipulation bugs, I will present an algorithm for d
 \label{monitor-template-section}
 \noindent I use monitor automata to analyze the control flow of a given input source file and detect whether possible bug are present in. A monitor automaton changes state based on what is happening in the control flow of the program. When the automaton reaches an error state, then a possible bug has been discovered. The effect analysis provided by EBA allows monitoring which effects program points have, and monitor automata can then monitor these effects in order to determine whether possible bugs are present. 
 
-\newpar EBA infers what effects happen on a memory region, which is an abstract variable or value in the heap. Monitor automata track effects happening on a given region in order to determine whether they could be manifesting buggy behaviour. Both effects and regions must be tracked. For example, it is common to have multiple locks on different regions within programs, but a lock on one region followed by a lock on a different region does not neccesarily mean that a locking bug is present unless these locks happen consequently on the same region. Monitor templates are defined formally as follows. 
+\newpar EBA infers what effects happen on a memory region, which is an abstract variable or value in the heap. Monitor automata track effects happening on a given region in order to determine whether they could be manifesting buggy behaviour. Both effects and regions must be tracked. For example, it is common to have multiple locks represented by different regions active simultaneously, but a lock on one region followed by a lock on a different region does not neccesarily mean that a locking bug is present unless these locks happen consequently on the same region. Monitor templates are defined formally as follows. 
 
-\newpar Given a region variable $\rho$, a monitor template is defined as the tuple $X_\rho (\sum, S, s_0, \delta, F, E)$ where $\sum$ is the alphabet of effects registered on memory objects represented by a region $\rho$, $S$ is a finite non-empty set of states, $s_0$ an initial state and an element of $S$, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$, $F$ is the non-empty set of final states and a subset of $S$, $E$ is the non-empty set of error states, and a subset of $F$. In other words, $X_\rho (\sum, S, s_0, \delta, F)$ is a finite state machine over regions and effects, augmented with the set of error states $E$. An illustration of such a monitor template can be seen in Figure \ref{double-unlock-automata-intro}.
+\newpar Given a region variable $\rho$, a monitor template is defined as the tuple $X_\rho (\sum, S, s_0, \delta, F, E)$ where $\sum$ is the alphabet of effects registered on memory objects represented by a region $\rho$, $S$ is a finite non-empty set of states, $s_0$ an initial state and an element of $S$, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$, $F$ is the non-empty set of final states and a subset of $S$, $E$ is the non-empty set of error states, and a subset of $F$. In other words, $X_\rho (\sum, S, s_0, \delta, F)$ is a finite state machine over regions and effects, augmented with the set of error states $E$. An illustration of such a monitor template can be seen in Figure \ref{double-unlock-automata-intro}. The monitor templates presently track a single region, $\rho$, but but this restriction is not essential and can be lifted if the need arises. 
 
-\newpar From this definition, I distinguish two kinds of monitor templates: \textit{long-term} and \textit{short-term}. \textit{Short-term} templates will monitor effects happening on a region only until a final state or error state is reached. \textit{Long-term} templates operate as \textit{short-term} templates, though they only include a single final state, which is the error state. They will therefore monitor indefinititely until only an error-state is found; no early temrination is possible. This distinction is made since early termination of monitors might result in performance improvements in the implementation of these monitors, since it may especiaally reduce the number of monitors active in the analyzers' memory. 
+\newpar From this definition, I distinguish two kinds of monitor templates: \textit{long-term} and \textit{short-term}. \textit{Short-term} templates will monitor effects happening on a region only until a final state or error state is reached. \textit{Long-term} templates operate as \textit{short-term} templates, though they only include a single final state, which is the error state. They will therefore monitor indefinititely until only an error-state is found; no early termination is possible. This distinction is made since early termination of monitors might result in performance improvements in the implementation of these monitors, since it may especially reduce the number of monitors active in the analyzers' memory. 
 
 \begin{figure}[H]
     \centering
@@ -20,9 +20,9 @@ In order to detect resource manipulation bugs, I will present an algorithm for d
     \label{double-unlock-automata-intro}
 \end{figure}
 
-\newpar I will present several examples of these monitors in the following sections. Though these are examples, they are important since the implementation of the monitors follows these examples. 
+\newpar I will present several examples of these monitors in the following sections. Though these are examples, they are important since my implementation of the monitors follows these examples. 
 
-\newpar Our monitors operate on the set of possible effects of a statement in the Control-flow Graph. EBA allows defining new effects tracking a host of different operation. In this thesis I will only be using the following effects, defined as $E = \{$\texttt{alloc}, \texttt{free}, \texttt{read}, \texttt{write}, \texttt{uninit}, \texttt{call}, \texttt{lock}, \texttt{unlock}$\}$ by Abal \cite{EffectiveBugFinding}. The effects and what they represent can be seen in Table \ref{effect-table}.
+\newpar Our monitors operate on the set of possible effects of a statement in the Control-flow Graph. EBA allows defining new effects tracking a host of different operation. In this thesis I will only be using the following effects, $E = \{$\texttt{alloc}, \texttt{free}, \texttt{read}, \texttt{write}, \texttt{uninit}, \texttt{call}, \texttt{lock}, \texttt{unlock}$\}$. The effects and what they represent can be seen in Table \ref{effect-table}.
 
 \begin{table}[H]
     \centering
@@ -31,7 +31,6 @@ In order to detect resource manipulation bugs, I will present an algorithm for d
         \texttt{free}   & The freeing of a memory location                      \\
         \texttt{read}   & The reading of a memory location                      \\
         \texttt{write}  & The writing to a memory location                      \\
-        \texttt{uninit} & Indicating that a memory location is uninitialized    \\
         \texttt{call}   & The call of a function                                \\
         \texttt{lock}   & The locking of a memory location                      \\
         \texttt{unlock} & The unlocking of a memory location    
@@ -53,12 +52,12 @@ A double-lock monitor detects two consecutive locks on a memory location with no
 
 \begin{itemize}
     \item $\sum = \{lock_\rho, unlock_\rho\}$, a subset of $E$
-    \item $S = \{ locked_\rho, unlocked_\rho, error_\rho \}$
-    \item $s_0 = unlocked_\rho$ 
-    \item $\delta =$ the relation $\{(unlocked_\rho, lock_\rho, locked_\rho), (locked_\rho, unlock_\rho, unlocked_\rho), \\
-    (locked_\rho, lock_\rho, error_\rho), (unlocked_\rho, unlock_\rho, unlocked_\rho)\}$ 
-    \item $E = \{ error_\rho \}$  
-    \item $F = \{ unlocked_\rho, error_\rho \}$
+    \item $S = \{ locked, unlocked, error \}$
+    \item $s_0 = unlocked$ 
+    \item $\delta =$ the relation $\{(unlocked, lock_\rho, locked), (locked, unlock_\rho, unlocked), \\
+    (locked, lock_\rho, error), (unlocked, unlock_\rho, unlocked)\}$ 
+    \item $E = \{ error \}$  
+    \item $F = \{ unlocked, error \}$
 \end{itemize}
 
 \noindent It is worth noting that this is a \textit{short-term} monitor, as $F \neq E$. This monitor will therefore terminate when encountering a legal use of locks followed by an unlock. An illustration of this monitor template can be seen in Figure \ref{double-lock-automata-short-term}. 
@@ -75,16 +74,16 @@ A double-lock monitor detects two consecutive locks on a memory location with no
 A double-unlock monitor detects two consecutive unlocks on a memory location with no lock in between them, leading to undefined behaviour. Given a region $\rho$, a double-unlock monitor template is defined as the tuple $(\sum, S, s_0, \delta, E, F)$ where: 
 
 \begin{itemize}
-    \item $\sum = \{unlock_\rho, lock_\rho\}$, a subset of $E$
-    \item $S = \{ locked_\rho, unlocked_\rho, error_\rho \}$
-    \item $s_0 = unlocked_\rho$ 
-    \item $\delta =$ the relation $\{(locked_\rho, unlock_\rho, unlocked_\rho), (locked_\rho, lock_\rho, locked_\rho), \\
-        (unlocked_\rho, lock_\rho, locked_\rho), (unlocked_\rho, unlock_\rho, error_\rho)\}$ 
+    \item $\sum = \{unlock, lock\}$, a subset of $E$
+    \item $S = \{ locked, unlocked, error \}$
+    \item $s_0 = unlocked$ 
+    \item $\delta =$ the relation $\{(locked, unlock_\rho, unlocked), (locked, lock_\rho, locked), \\
+        (unlocked, lock_\rho, locked), (unlocked, unlock_\rho, error)\}$ 
     \item $E = \{ error_\rho \}$
     \item $F = E$
 \end{itemize}
 
-\noindent It is worth noting that this is a \textit{long-term} monitor, as $F = E$. An illustration of this monitor template can be seen in Figure \ref{double-unlock-automata}. 
+\noindent It is worth noting that this is a \textit{long-term} monitor, as $F = E$. An illustration of this monitor template can be seen in Figure \ref{double-unlock-automata}. Note that this monitor template allows multiple consecutive locks, which results in a double-lock bug being present in the code under anaalysis. This is due to separation of concerns such that a single monitor checks for a single bug type. The monitor templates can be run in combination in order to detect double-lock bugs as well as double-unlock bugs.
 
 \subsubsection*{Long-term Double-free Monitor Template}
 
@@ -95,15 +94,15 @@ A double-unlock monitor detects two consecutive unlocks on a memory location wit
     \label{double-free-automata}
 \end{figure}
 
-A double-free monitor detects two consecutive frees on a memory location with no allocation in between them, potentially leading to modification of unexpected memory locations. Given a region $\rho$, a double-free monitor template is defined as the tuple $(\sum, S, s_0, \delta, E, \\F)$ where: 
+A double-free monitor detects two consecutive frees on a memory location with no allocation in between them, potentially leading to modification of unexpected memory locations. Given a region $\rho$, a double-free monitor template is defined as the tuple $(\sum, S, s_0, \delta, E, F)$ where: 
 
 \begin{itemize}
     \item $\sum = \{free_\rho, alloc_\rho\}$, a subset of $E$
-    \item $S = \{ allocated_\rho, freed_\rho, error_\rho \}$
-    \item $s_0 = freed_\rho$ 
-    \item $\delta =$ the relation $\{(freed_\rho, alloc_\rho, allocated_\rho), (allocated_\rho, free_\rho, freed_\rho), \\
-    (freed_\rho, free_\rho, error_\rho), (allocated_\rho, alloc_\rho, allocated_\rho)\}$ 
-    \item $E = \{ error_\rho \}$  
+    \item $S = \{ allocated, freed, error \}$
+    \item $s_0 = freed$ 
+    \item $\delta =$ the relation $\{(freed, alloc_\rho, allocated), (allocated, free_\rho, freed), \\
+    (freed, free_\rho, error), (allocated, alloc_\rho, allocated)\}$ 
+    \item $E = \{ error \}$  
     \item $F = E$
 \end{itemize}
 
@@ -113,20 +112,21 @@ An illustration of this monitor template can be seen in Figure \ref{double-free-
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.4\textwidth]{algorithm/figures/use-before}
+    \includegraphics[width=0.5\textwidth]{algorithm/figures/use-before}
     \caption{An illustration of a short-term use-before-init monitor template.}
     \label{use-before-automata}
 \end{figure}
 
-A use-before init monitor detects usage of a memory location before the location has been initialized, possibly leaving the resource in an unexpected state when it is accessed or used. Given a region $\rho$, a use-before-init monitor template is defined as the tuple $(\sum, S, s_0, \delta, E, \\F)$ where: 
+A use-before init monitor detects usage of a memory location before the location has been initialized, possibly leaving the resource in an unexpected state when it is accessed or used. Given a region $\rho$, a use-before-init monitor template is defined as the tuple $(\sum, S, s_0, \delta, E, F)$ where: 
 
 \begin{itemize}
-    \item $\sum = \{read_\rho, init_\rho\}$, a subset of $E$
-    \item $S = \{ uninitialized_\rho, initialized_\rho, error_\rho \}$
-    \item $s_0 = uninitialized_\rho$ 
-    \item $\delta =$ the relation $\{(uninitialized_\rho, init_\rho, initialized_\rho), (uninitialized_\rho, read_\rho, error_\rho)\}$ 
-    \item $E = \{ error_\rho \}$  
-    \item $F = \{ error_\rho, initialized_\rho \}$
+    \item $\sum = \{alloc_\rho, read_\rho, write_\rho\}$, a subset of $E$
+    \item $S = \{ unallocated, allocated, initialized, freed, error \}$
+    \item $s_0 = unallocated$ 
+    \item $\delta =$ the relation $\{(unallocated, alloc_\rho, allocated), (allocated, write_\rho, initialized), \\
+    (allocated, free_\rho, freed), (allocated, read_\rho, error)\}$ 
+    \item $E = \{ error \}$  
+    \item $F = \{ error, initialized, freed \}$
 \end{itemize}
 
 An illustration of this monitor template can be seen in Figure \ref{use-before-automata}. 
@@ -139,16 +139,16 @@ EBA provides a representation of the control flow of the input source files whic
 
 \newpar The control flow generated by EBA is acyclic, since EBA unrolls loops within a fixed depth and generates a path of this length accordingly. I keep the abstract formulation since, in principle, the monitor automata checkers will work with more general abstractions over programs.
 
-\newpar The powerset of effects, $\sum$, of the of the control flow abstraction is the set of all effects EBA detects, annotated by the region variables being affected by a given effect. $S$ is the set of  program points after unrolling loops. The definition of the control flow abstraction is shown in the following, with a concrete example of a control flow formulated using this abstraction in Figure \ref{cfg_example-automaton}. 
+\newpar The powerset of effects, $\sum$, of the of the control flow abstraction is the set of all effects EBA detects, annotated by the region variables being affected by a given effect. $S$ is the set of program points. The definition of the control flow abstraction is shown in the following, with a concrete example of a control flow formulated using this abstraction in Figure \ref{cfg_example-automaton}. 
 
 \begin{itemize}
-    \item $\sum = P\{ \mathcal{E}_{\rho_i} | i \in \mathbb{N} \text{ and } \mathcal{E} \in \{ alloc, free, read, write, uninit, call, lock, unlock\}\}$
+    \item $\sum = P\{ \mathcal{E}_{\rho_i} | i \in \mathbb{N} \text{ and } \mathcal{E} \in \{ alloc, free, read, write, call, lock, unlock\}\}$
     \item $S = \{1, 2, 3, 4, 5, 6, 7, 8\}$
 \end{itemize}
 
 \noindent The remainder of the automaton is defined according to the control flow being modelled, where the initial state, $s_0$, is the entry point. A concrete definition of an example control flow is shown below with an accompanying illustration of this in Figure \ref{cfg_example-automaton}.
 
-\begin{figure}[H]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.5\textwidth]{algorithm/figures/cfg_example}
     \caption{An illustration of a Control Flow automaton.}
@@ -162,9 +162,9 @@ EBA provides a representation of the control flow of the input source files whic
             \begin{aligned}[t]
             \delta = \text{the relation} \quad \{ \quad 
             & (1, \{alloc_{\rho_1}\}, 2), \quad \quad (2, \{alloc_{\rho_2}\}, 3), \\
-            & (3, \{lock_{\rho_2}\}, 4), \quad \quad (4, \{unlock_{\rho_2}\}, 5) \\
+            & (3, \{lock_{\rho_2}, ...\}, 4), \quad \quad (4, \{unlock_{\rho_2}, ...\}, 5) \\
             & (5, \emptyset, 6), \quad \quad \quad \quad \quad (5, \emptyset, 7), \\
-            & (6, \{unlock_{\rho_2}\}, 8), \quad (7, \{write_{\rho_1}\}, 8) \quad \}
+            & (6, \{unlock_{\rho_2}, ...\}, 8), \quad (7, \{write_{\rho_1}\}, 8) \quad \}
             \end{aligned}
         $ 
     }
@@ -175,33 +175,33 @@ EBA provides a representation of the control flow of the input source files whic
 
 \newpar To show the detection of a possible double-unlock bug we find the product of the control flow example shown in Figure \ref{cfg_example-automaton} and the monitor generated from the template. 
 
-\newpar Given a region $\rho$, an automaton $A_{CFG} = (P(\mathcal{E}_{\bar{\rho}}), S, s_0, \delta, \emptyset)$ and a monitor template $A_{monitor} = (\sum, S', s'_0, \delta', F')$ , the product automaton of $A_{CFG}$ and $A_{monitor}$ is an automaton $P_{\bar{\rho}} = (\sum_{\bar{\rho}}, Q, s'_0, \delta_P, F_P)$ where 
+\newpar Given a region $\rho$, a monitor template $A_{monitor} = (\sum, S, s_0, \delta, F)$ and an automaton $A_{CFG} = (\sum', S', s_0', \delta', \emptyset)$, the product automaton of $A_{CFG}$ and $A_{monitor}$ is an automaton $P = (\sum, Q, s'_0, \delta_P, F_P)$ where 
 
 \begin{itemize}
-    \item $\mathcal{E}_{\bar{\rho}}$ is created from $\mathcal{E}$ by substituting its template parameter with an actual value $\bar{\rho}$
-    \item $F_\rho = S \times F'$
+    \item $\mathcal{E}_{\bar{\rho}}$ is created from $\mathcal{E}$ by substituting its template parameter with an actual value $\bar{\rho}$ by instantiating the template for $\bar{\rho}$
+    \item $F_P = S \times F'$
     \item $Q = S \times S'$
-    \item $\delta_P : Q \times \sum \rightarrow Q$ which is generated for all $s_1, s_2 \in S$, $s'_1, s'_2 \in S'$, $e \in \sum$, $E \in P(\mathcal{E}_{\bar{\rho}}) \forall q \in Q , q' \in Q'$ and $e \in \sum$ using the rules
+    \item $\delta_P : Q \times \sum \rightarrow Q$ which is generated for all $s_1, s_2 \in S$, $s'_1, s'_2 \in S'$, $e \in \sum$, $E' \in \sum'$ and $\forall q \in Q , q' \in Q'$ following two rules
 \end{itemize}
     
 \begin{center}
     \begin{prooftree}
         \hypo{s_1 \xrightarrow{\bar{e}} s_2}
         \hypo{s'_1 \xrightarrow{E} s'_2}
-        \hypo{e \in E}
-        \infer3{(s_1, s'_1) \rightarrow (s_2, s'_2)}
+        \hypo{\bar{e} \in E}
+        \infer3{(s_1, s'_1) \xrightarrow{E} (s_2, s'_2)}
     \end{prooftree}
     \hspace{2cm}
     \begin{prooftree}
         \hypo{s'_1 \xrightarrow{E} s'_2}
         \hypo{\forall e \in \sum\:.\:s_1 \centernot{\xrightarrow{\bar{e}}}}
-        \infer2{(s_1, s'_1) \rightarrow (s_1, s'_2)}
+        \infer2{(s_1, s'_1) \xrightarrow{E} (s_1, s'_2)}
     \end{prooftree}
 \end{center}
 
 \noindent where $\bar{e} = e [\bar{\rho}/\rho]$ for some $e \in \sum$ by substitution of the template parameter. 
     
-\newpar It is necessary to define rules for the state changes within this product, given that a monitor only accepts effects on a given region. $E$ is the set of effects happening in a given program step, $s'_1 \rightarrow s'_2$. The state $s_1$ will change given that the transition happens on the effect $e$, present in $E$. If this is not the case, the control flow will have changed state to $s'_2$, while the monitor has not and stays the same, $s_1$. 
+\newpar It is necessary to define rules for the state changes within this product, given that a monitor only accepts effects on a given region. $E$ is the set of effects happening in a given program step, $s'_1 \rightarrow s'_2$. The monitor state $s_1$ will change given that the transition happens on the effect $e$, present in $E$. If this is not the case, the control flow will have changed state to $s'_2$, while the monitor has not and stays the same, i.e. $s_1$. 
 
 \newpar In other words, the state of the automata should not change if the effect does not happen on the monitored region, but the automaton representing the control flow \textit{should}. The observant reader might notice that if regions are no longer present since they go out of scope scope in a given program, only the rightmost of the two previous inference rules is relevant. This is an opportunity for an optimization in a bug checker, which is presently not exploited. Taking scopes into account would complicate the product construction significantly and the reader might appreciate not having to reason about more convoluted definitions. Lack of scope information does lead to the question of whether these \textit{"dangling"} regions incur a significant performance cost when implemented. I will investigate and evaluate this in later sections.
 
@@ -214,8 +214,8 @@ EBA provides a representation of the control flow of the input source files whic
     \item{
         $
             \begin{aligned}[t]
-                S = & \{\;(1, unlocked), (2, unlocked), (3, unlocked), (4, locked), (5, unlocked), (6, unlocked),\\
-                & (7, unlocked), (8, error), (8, unlocked) \; \}
+                S = & \{\;(unlocked, 1), (unlocked, 2), (unlocked, 3), (locked, 4), (unlocked, 5), (unlocked, 6),\\
+                & (unlocked, 7), (error, 8), (unlocked, 8) \; \}
             \end{aligned}
         $
     }
@@ -223,18 +223,18 @@ EBA provides a representation of the control flow of the input source files whic
     \item {
         $
             \begin{aligned}[t]
-            \delta = \text{the relation} \; \{ \; & ((1, unlocked), alloc_{\rho_1}, (2, unlocked)), \\
-            & ((2, unlocked), alloc_{\rho_2}, (3, unlocked)), \\
-            & ((3, unlocked), lock_{\rho_2}, (4, locked)), \\
-            & ((4, locked), unlock_{\rho_2} (5, unlocked)), \\
-            & ((5, unlocked), \emptyset, (6, unlocked)), \\
-            & ((5, unlocked), \emptyset, (7, unlocked)),\\
-            & ((7, unlocked), unlock_{\rho_2}, (8, error)), \\
-            & ((7, unlocked), write_{\rho_1}, (8, unlocked)) \; \}
+            \delta = \text{the relation} \; \{ \; & ((unlocked, 1), alloc_{\rho_1}, (unlocked, 2)), \\
+            & ((unlocked, 2), alloc_{\rho_2}, (unlocked, 3)), \\
+            & ((unlocked, 3), lock_{\rho_2}, (locked, 4)), \\
+            & ((locked, 4), unlock_{\rho_2} (unlocked, 5)), \\
+            & ((unlocked, 5), \emptyset, (unlocked, 6)), \\
+            & ((unlocked, 5), \emptyset, (unlocked, 7)),\\
+            & ((unlocked, 7), unlock_{\rho_2}, (error, 8)), \\
+            & ((unlocked, 7), write_{\rho_1}, (unlocked, 8)) \; \}
             \end{aligned}
         $ 
     }
-    \item $F = (8, error)$  
+    \item $F = (error, 8)$  
 \end{itemize}
 
 \noindent This product is illustrated in Figure \ref{cfg_unlock-product}. 
