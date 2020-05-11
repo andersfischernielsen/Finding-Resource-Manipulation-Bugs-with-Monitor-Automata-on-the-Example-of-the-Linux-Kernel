@@ -1,8 +1,10 @@
 \section{Background: The EBA Framework}
+\label{background-section}
 The EBA framework reference provides \textit{shape-and-effect inference} and allows extracting an \textit{effect-annotated control flow graph} (effect-CFG) from a Linux kernel program. The annotated control flow graph can be statically analyzed in order to find possible bugs in the given program. A control-flow-graph is a representation of all paths that might be traversed through a program when executed \cite{cfg}. A node in the graph represents a program point where edges represent a jump in the control flow. 
 
 \newpar Figure \ref{initial-bug-visualisation} shows an example of a bug found in the Linux kernel\footnote{This bug was patched in commit \href{https://github.com/torvalds/linux/commit/4dd75b33}{\texttt{4dd75b33}}.} and the data types provided by the framework. These data types have been used in this thesis to develop new resource manipulation bug checkers. This section will explain the definitions by Abal et. al. \cite{Abal2017EffectiveBF} which I build upon in this thesis in order to develop new bug checkers. 
 
+\todo{I'm currently working on making this figure adhere to the others' style of symbols etc. }
 \begin{figure}[H]
 \centering
 \begin{minipage}{0.4\textwidth}
