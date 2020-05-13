@@ -3,6 +3,7 @@
 \begin{itemize}
     \item Make an argument for monitors being better than CTL 
     \item Extensibility
+    
     \setlength\itemindent{15pt} 
     \item Implementation of CTL limits expressiveness, monitor automata are not
     \item Show an automaton that expressed things that CTL cannot
@@ -12,3 +13,5 @@
     \item Measure before (CTL) and after (automata) results
     \item Possible comparison to BLAST and Cocinelle tools
 \end{itemize}
+
+\noindent Experimental static analysis has recently been added to the GCC compiler chain \cite{gcc10}, allowing developers to run check for double-free bugs in their code. David Malcolm --- the developer of the static analysis released in GCC 10 --- has described his challenges in reducing the amount of false positives during the development of the analysis \cite{gcc10-development}, showing that reducing these proves to be a difficult problem. Reducing false positives is important, since developers might avoid using a tool if they see false output too often. The developer of the popular \texttt{curl} command-line tool confirms this, noting that the addition of the analysis in GCC 10 is appreciated, but that it still produces too many false positives to be usable. \cite{curl-static-analysis}. Reducing the amount of false positives in the implementation of monitor templates has been difficult, since a tradeoff between the ability to detect more bugs and reducing the amount of false positives has to be made. In other words, increasing precision is hard. This is reflected in the evaluation of the implementation of monitor templates. We see that the actual bugs are present, but false positives are also reported. 

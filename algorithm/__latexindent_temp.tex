@@ -83,7 +83,7 @@ A double-unlock monitor detects two consecutive unlocks on a memory location wit
     \item $F = E$
 \end{itemize}
 
-\noindent It is worth noting that this is a \textit{long-term} monitor, as $F = E$. An illustration of this monitor template can be seen in Figure \ref{double-unlock-automata}. Note that this monitor template allows multiple consecutive locks, which results in a double-lock bug being present in the code under anaalysis. This is due to separation of concerns such that a single monitor checks for a single bug type. The monitor templates can be run in combination in order to detect double-lock bugs as well as double-unlock bugs.
+\noindent It is worth noting that this is a \textit{long-term} monitor, as $F = E$. An illustration of this monitor template can be seen in Figure \ref{double-unlock-automata}. Note that this monitor template allows multiple consecutive locks, which results in a double-lock bug being present in the code under analysis. This is due to separation of concerns such that a single monitor checks for a single bug type. The monitor templates can be run in combination in order to detect double-lock bugs as well as double-unlock bugs.
 
 \subsubsection*{Long-term Double-free Monitor Template}
 
