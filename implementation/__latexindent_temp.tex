@@ -6,18 +6,11 @@
 \subsection{Implementing Monitor Templates}
 \newpar Monitor automata are used to detect bugs over control flow graphs. The control flow graph is provided by the EBA framework, while the monitor automata have been defined and implemented as part of this thesis. The framework will then instantiate a given bug checker after which an abstract representation of the input source file is passed to the instantiated checker. 
 
-\newpar When inferred effects happening on regions are encountered in the control flow graph, a monitor is instantiated based on the monitor template defined in \texttt{Make}. The \texttt{check} function of the \texttt{Make} module explores the CFG provided by the EBA framework of the given file and applies the transition of the monitor using the effects of statements, represented as nodes in the CFG. The control flow graph is represented as a tree-like structure, and this tree is then explored further until the end of each path in the tree is explored, resulting in a set of monitor states. Loops in the input source code for programs are unrolled by EBA and are represented as repeating nodes on a path in the structure, which is what allows the control flow to be represented as a tree. This set of states can then be explored in order to determine if any monitors have reached accepting --- Error --- states. If such a state is present, a possible bug has been discovered. On-the-fly exploration is used since the design of EBA necessitates exploring effects when they are encountered due to performance reasons \cite{Abal2017EffectiveBF}. 
+\newpar When inferred effects happening on regions are encountered when exploring the control flow graph, a monitor is instantiated based on the monitor template. The CFG provided by the EBA framework of the given file is explored and the transition function of the monitor is applied using the effects of statements, represented as nodes in the CFG. The EBA control flow graph is represented as a tree-like structure and this tree is then explored further until the end of each path in the tree is explored, resulting in a set of monitor states. Loops in the input source code for programs are unrolled by EBA and are represented as repeating nodes on a path in the structure, allowing the control flow to be represented as a tree. This set of states can after exploration be filtered to determine if any monitors have reached accepting --- Error --- states. If such states are present, possible bugs have been discovered. 
 
-\newpar EBA can generate the required control flow abstraction, which is used for analysis. This thesis consists of integrating the implementation of monitor templates into the existing framework, using the control flow abstractions provided by EBA. In order to present how monitor templates are instantiated based on the given control flow, it is necessary to describe the control flow abstractions. EBA generates a tree structure of the input, modeling statements as so-called \texttt{step}s. A path in this tree structure models a possible execution path, with each \texttt{step} in a path containing information about the modelled statements. The implementation of monitor templates works by:
+\newpar EBA can generate the required control flow abstraction, which is used for analysis. I have integrated the implementation of monitor templates into the existing framework using the control flow abstractions provided by EBA. In order to present how monitor templates are instantiated based on the given control flow, it is necessary to describe these control flow abstractions. 
 
-\begin{itemize}
-    \item Taking a source file, \texttt{file} and a function declaration, \texttt{declaration} within that source file provided by EBA
-    \item Extracting information, \texttt{variable\_info}, about the provided function and verifies that the function is non-static
-    \item Invoking the \texttt{paths\_of} CFG-generation of EBA of the function
-    \item Exploring the effect CFG provided by EBA, \texttt{explore\_paths}, while invoking the transition function of a monitor template
-    \item Filtering the resulting map of regions and monitor states
-    \item Pretty-printing the results and returns these to EBA which in turn shows the results 
-\end{itemize}
+\newpar EBA generates the aforementioned tree-like structure of the input program, modeling statements as so-called \texttt{step}s. A path in this tree structure models a possible execution path, with each \texttt{step} in a path containing information about the modelled program point. 
 
 \newpar A \textit{step} models a program point in the input source code, and contain the inferred effects of this program points as a set. These possibly multiple effects raise a problem; since a given step contains a set of effects, the order of these effects are therefore not known and all orders of executing these effects must be explored. This must be done since a given ordering of effects can lead to a bug, while a different order might not. The reader is encouraged to examine the example given in Figure \ref{multiple-region-example} to understand why this is the case. In the example, two locks are taken on two different regions and these regions are then both unlocked in a called function. One of the regions is then unlocked again following the function call, leading to a double-unlock bug. If monitors are not instantiated for each region, an error state would occur when analyzing the effects of the function call even though the bug is in fact not found within the function, but just after the function. Recall that we use a simple effect system and a set of effects to summarize a step, including function calls as detailed in Section \ref{background-section}.
 
@@ -72,7 +65,20 @@
 
 \newpar Given a large number of possible effects of a statement the resulting set of permutations of these effects will naturally grow. A set of $N$ effects will result in $N!$ permutations; in other words, the number of monitor states for a given region will therefore in the worst case be $|\mathit{effects}|!$. This $N$ can be reduced by only applying effects to monitors which are of interest, namely effects which are in the alphabet, $\sum$, of the monitor template definition. Effects are only applied to the monitors monitoring a region if the alphabet of the monitor in question accepts this effect, in other words utilizing the product construction inference rules defined in Chapter \ref{control-flow-section}.  Filtering effects caused by a program point to only include elements in $\sum$ greatly reduces the number of monitors states, though this is inherently dependent on the template definition. Definitions with a restricted alphabet will perform better. 
 
+The full implementation of monitor templates therefore works by:
+
+\begin{itemize}
+    \item Taking a source file and a function declaration within that source file, both provided by EBA
+    \item Extracting information about the provided function and verifies that the function is non-static
+    \item Invoking the CFG-generation of EBA of the provided function
+    \item Exploring the effect CFG provided by EBA while invoking the transition function of monitor templates
+    \item Filtering the resulting map of monitor states
+    \item Pretty-printing the results and returning these to EBA, in turn outputting the results 
+\end{itemize}
+
 \newpar The implementation of the exploration of control flow, finding states and adding these states to the map can be seen in Figure \ref{explore_tree-implementation}. This \texttt{explore\_paths} function takes a control flow graph generated by EBA and an initially empty map as input parameters and results in a map of all inferred regions and the resulting monitor states for these regions. This is accomplished by recursively exploring the tree-like control flow graph and depending on the encountered program point, applies the possible effects of the program point on the transition function of the instantiated monitor, \texttt{A}. The resulting state(s) are then added to the map. 
+
+\todo[inline]{Note: I honestly find the OCaml easier to read than the pseudocode. Do you agree? }
 
 \begin{figure}[H]
     \centering
@@ -118,43 +124,45 @@
     \label{explore_tree-implementation}
 \end{figure}
 
+\todo[inline]{Note: Here's the pseudocode for comparison.}
+
+\begin{algorithm}[H]
+\begin{algorithmic}
+    \Function{explore\_paths} {$tree\_node$, $map$} 
+        \If {$tree\_node$ is $\mathit{Nil}$}    
+            \State{\Return $map$}
+        \ElsIf {$tree\_node$ is $\mathit{If}(t, f)$}
+            \State{$true\_branch \gets $ \Call{explore\_paths}{t}}
+            \State{$false\_branch \gets $ \Call{explore\_paths}{f}} 
+            \State{\Return \Call{merge}{$true\_branch$, $false\_branch$}}
+        \ElsIf {$tree\_node$ is $\mathit{Seq}(step, next)$}
+            \State{effects $\gets$ step.effects}
+            \If{\Call{is\_empty}{effects}}
+                \Return{\Call{explore\_paths}{next, map}}
+            \EndIf
+            \State{permutations $\gets$ \Call{find\_permutations}{effects}}
+            
+            \State{\Call{for each effect in each permutation}{\Call{apply\_transition} {effect, map}}}
+        \EndIf      
+    \EndFunction
+    \\
+    \Function{apply\_transition} {effect, map}
+        \State{region $\gets$ effect.region}
+        \State{previous\_states\_for\_region $\gets$ \Call{find\_default}{[initial\_state], region, map}}
+        \State states $\gets$ \Call{for each previous state}{\Call{transition} {state, effect}}
+        \State{\Return {\Call{add}{map, region, states}}}
+    \EndFunction
+    \\
+    \State{tree $\gets $\Call{generate\_tree} {input\_file}}
+    \State{map $\gets $ \Call{explore\_paths}{tree}}
+\end{algorithmic}
+\end{algorithm}
+
 \newpar When all paths in the CFG tree structure have been explored, the regions which map to accepting states along with their location and traces are extracted from the mapping and presented to the user as possible bugs.  
 
-% \newpar This approach can be described in pseudocode as follows.
+\newpar On-the-fly exploration is used since the design of EBA necessitates exploring effects when they are encountered due to performance reasons \cite{Abal2017EffectiveBF}. On-the-fly exploration has been used for ease-of-implementation by following the existing convention of the EBA implementation and for performance reasons. The exploration finds the product construction of the control flow graph and monitor on a step-by-step basis by application of the transition function of a monitor and the information stored in a program point in the control flow graph. The resulting state pair is the product construction of the control flow graph and monitor as decribed in Chapter \ref{monitor-template-section}. 
 
-% \begin{algorithm}[H]
-% \begin{algorithmic}
-%     \Function{explore\_paths} {$tree\_node$, $map$} 
-%         \If {$tree\_node$ is $\mathit{Nil}$}    
-%             \State{\Return $map$}
-%         \ElsIf {$tree\_node$ is $\mathit{If}(t, f)$}
-%             \State{$true\_branch \gets $ \Call{explore\_paths}{t}}
-%             \State{$false\_branch \gets $ \Call{explore\_paths}{f}} 
-%             \State{\Return \Call{merge}{$true\_branch$, $false\_branch$}}
-%         \ElsIf {$tree\_node$ is $\mathit{Seq}(step, next)$}
-%             \State{effects $\gets$ step.effects}
-%             \If{\Call{is\_empty}{effects}}
-%                 \Return{\Call{explore\_paths}{next, map}}
-%             \EndIf
-%             \State{permutations $\gets$ \Call{find\_permutations}{effects}}
-            
-%             \State{\Call{for each effect in each permutation}{\Call{apply\_transition} {effect, map}}}
-%         \EndIf      
-%     \EndFunction
-%     \\
-%     \Function{apply\_transition} {effect, map}
-%         \State{region $\gets$ effect.region}
-%         \State{previous\_states\_for\_region $\gets$ \Call{find\_default}{[initial\_state], region, map}}
-%         \State states $\gets$ \Call{for each previous state}{\Call{transition} {state, effect}}
-%         \State{\Return {\Call{add}{map, region, states}}}
-%     \EndFunction
-%     \\
-%     \State{tree $\gets $\Call{generate\_tree} {input\_file}}
-%     \State{map $\gets $ \Call{explore\_paths}{tree}}
-% \end{algorithmic}
-% \end{algorithm}
-
-\newpar As described previously, on-the-fly exploration has been used for ease-of-implementation and performance reasons. The exploration finds the product construction of the control flow graph and monitor on a step-by-step basis by application of the transition function of a monitor and the information stored in a program point in the control flow graph. The resulting pair of control flow and monitor state is found in the product construction of the control flow graph and monitor as decribed in Chapter \ref{monitor-template-section}. After finding this pair, the monitor state in the second element of this pair is, as mentioned previously, added to the region and state map in order to track monitor states for regions. The product construction is built step-by-step, but the complete product construction is not saved for later use, since the elements of interest in the resulting pair is the found monitor state. The inference rules defined in Chapter \ref{monitor-template-section} for constructing the product, state that a transition --- the exploration of the program points --- will change the state of the control flow graph, but possibly leave the monitor state in its current state if the effects of a program point are not in the transitions of the monitor. This is reflected in the implementation described previously in this chapter, where monitors remain in their current state given an input that the monitor does not operate on. Therefore, even though the product construction is not stored or presented explicitly in the implementation, it is still constructed albeit step-by-step and is in a partial state on a given program point.
+\newpar The monitor state in the second element of this pair is, as mentioned previously, added to the region and state map in order to track monitor states for regions. The product construction is built step-by-step, but the complete product construction is not saved for later use, as the elements of interest in the resulting pair is the found monitor state. The inference rules defined in Chapter \ref{monitor-template-section} for constructing the product, state that a transition --- the exploration of the program points --- will change the state of the control flow graph, but possibly leave the monitor state in its current state if the effects of a program point are not in the transitions of the monitor. This is reflected in the implementation, where monitors remain in their current state given an input that the monitor does not operate on. Therefore, even though the product construction is not stored or presented explicitly in the implementation, it is still constructed albeit step-by-step and is in a partial state on a given program point.
 
 \newpar Consider the illustration in Chapter \ref{monitor-template-section}, with the relevant part of this illustration shown in Figure \ref{cfg_unlock-product-partial}. When exploring the control flow graph, on encountering the effect \texttt{unlock} and region $\rho$, a monitor is instantiated for $\rho$ in the unlocked state. If a given effect is not in the transitions of the monitor, as seen when encountering the effect \texttt{write}, the exploration continues onto the next program point, implicitly changing the state of the control flow graph by transitioning onto the next node in the graph, while leaving the monitor in its previous state as the inference rules in Chapter \ref{monitor-template-section} state. When encountering an \texttt{unlock} effect, which is in the transitions of the monitor, the monitor will change state to an error state. This corresponds to the defined product construction, though instead of constructing the entire product, this partial product is found on-the-fly. 
 
@@ -197,12 +205,21 @@
 
 \newpar The aforementioned signature is implemented as a module, \texttt{Make}, which is used by EBA in order to run automata bug checkers conforming to an automata signature. The \texttt{Make} module expects an implementation of this \texttt{AutomataSpec} signature. 
 
-\noindent The implementation of \texttt{check} initiating the generation of the control flow abstraction using EBA can be seen in Figure \ref{check-implementation}. 
+\noindent The implementation of \texttt{check} initiating the generation of the control flow abstraction using EBA can be seen in Figure \ref{check-implementation}. This function can be summarized as:
+
+\begin{itemize}
+    \item Taking a source file, \texttt{file} and a function declaration, \texttt{declaration} within that source file provided by EBA
+    \item Extracting information, \texttt{variable\_info}, about the provided function and verifies that the function is non-static
+    \item Invoking the \texttt{paths\_of} CFG-generation of EBA of the function
+    \item Exploring the effect CFG provided by EBA, \texttt{explore\_paths}, while invoking the transition function of a monitor template
+    \item Filtering the resulting map of regions and monitor states
+    \item Pretty-printing the results and returns these to EBA which in turn shows the results 
+\end{itemize}
 
 \begin{figure}[H]
     \centering
     \begin{minted}{ocaml}
-        let check file declaration =
+    let check file declaration =
         let variable_info = Cil.(declaration.svar) in
         match variable_info.vstorage with 
         | Static -> L.of_list []
@@ -227,6 +244,8 @@
 \end{figure}
 
 \newpar Nodes in the CFG structure provided by EBA can be of one of four different types, each representing the input statement. Nodes representing if-statements in the source input result are \textit{If}-nodes in the tree, containing two branches. If an If-node is discovered, the two branches from that node are explored and the union of the resulting states is found. Nodes representing the end of a branch are \textit{Nil}-nodes in the tree. Nodes representing assumptions made after if-statements are either true or false are \textit{Assume}-nodes, but are not used in this work since all branches are explored. Finally all other statements are represented as \textit{Seq}-nodes, which contain information about the shapes and effects of statements. An illlustration of these types can be seen in Figure \ref{cfg-nodes}. These \textit{Seq}-nodes are of interest, since they allow analysis on effects.  
+
+\todo[inline]{Are these illustrations of data types needed? I think text might be enough, no? }
 
 \begin{figure}[H]
     \centering

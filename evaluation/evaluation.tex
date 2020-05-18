@@ -15,3 +15,29 @@
 \end{itemize}
 
 \noindent Experimental static analysis has recently been added to the GCC compiler chain \cite{gcc10}, allowing developers to run check for double-free bugs in their code. David Malcolm --- the developer of the static analysis released in GCC 10 --- has described his challenges in reducing the amount of false positives during the development of the analysis \cite{gcc10-development}, showing that reducing these proves to be a difficult problem. Reducing false positives is important, since developers might avoid using a tool if they see false output too often. The developer of the popular \texttt{curl} command-line tool confirms this, noting that the addition of the analysis in GCC 10 is appreciated, but that it still produces too many false positives to be usable. \cite{curl-static-analysis}. Reducing the amount of false positives in the implementation of monitor templates has been difficult, since a tradeoff between the ability to detect more bugs and reducing the amount of false positives has to be made. In other words, increasing precision is hard. This is reflected in the evaluation of the implementation of monitor templates. We see that the actual bugs are present, but false positives are also reported. 
+
+\begin{table}[]
+    \scriptsize
+    \begin{tabular}{lllll}
+    \textbf{File}                                 & \textbf{Present in} & \textbf{My Approach}  & \textbf{Previous Approach} & \textbf{Patched in} \\
+    \hline
+    drivers/block/drbd/drbd\_main.c               & b0814361            & Detected              & Not detected               & 8e9c5230            \\
+    fs/ubifs/orphan.c                             & 7542c6de            & Detected              & Detected                   & 4dd75b33            \\
+    drivers/gpu/drm/nouveau/nouveau\_svm.c        & 5fbcf501            & Not detected          & Not detected               & de4ee728            \\
+    fs/btrfs/file.c                               & 78e03651            & Not detected          & Not detected               & f49aa1de            \\
+    drivers/staging/wilc1000/wilc\_wlan.c         & ca641bae            & Not detected          & Not detected               & fea69916            \\
+    drivers/staging/kpc2000/kpc\_dma/fileops.c    & d4c596eb            & Not detected          & Not detected               & c85aa326            \\
+    fs/nfs/client.c                               & a46126cc            & Not detected          & Not detected               & c260121a            \\
+    fs/btrfs/file.c                               & 2b90883c            & Not detected          & Not detected               & 8fca9550            \\
+    drivers/media/dvb-core/dvbdev.c               & ded71626            & Internal error        & Internal error             & 122d0e8d            \\
+    mm/memory\_hotplug.c                          & 6376360e            & Detected              & Not detected               & e3df4c6e            \\
+    sound/soc/codecs/pcm512x.c                    & fd270fca            & Not detected          & Not detected               & 28b698b7            \\
+    drivers/target/target\_core\_user.c           & 807cf197            & Not detected          & Not detected               & f0e89aae            \\
+    drivers/rpmsg/qcom\_smd.c                     & fb416f69            & Not detected          & Not detected               & c3388a07            \\
+    drivers/scsi/aacraid/commsup.c                & 09624645            & Not detected          & Not detected               & d844752e            \\
+    drivers/staging/rtl8188eu/os\_dep/usb\_intf.c & 612e1c94            & Compile error         & Compile error              & 23bf4042            \\
+    block/blk-cgroup.c                            & e0223003            & Compile error         & Compile error              & bbb427e3  
+    \end{tabular}
+    \caption{The results of compaaring the previous CTL-based approach to my monitor-template-based approach.}
+    \label{evaluation-table}
+\end{table}
