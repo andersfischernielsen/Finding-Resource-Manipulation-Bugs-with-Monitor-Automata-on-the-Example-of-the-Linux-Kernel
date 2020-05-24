@@ -1,12 +1,21 @@
 \section{Evaluation}
 
-In the implementation of the Computation Tree Logic (CTL) bug checker specifications by Abal et. al., the checkers implement four predicates, forming the CTL formula $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$ \cite{Abal2017EffectiveBF}\cite{research-project}. This formula can also be written as $E\;[a\;\cup\;b\;\land\;EX\;E[c\;\cup\;d]]$. This limits the expressiveness of checks which can be defined, given that the logic for detecting bugs must be implemented within these four functions. Specifying the checkers as monitor templates therefore allows for greater expressiveness in the checker definition. To illustrate this, Figure \ref{expressive-monitor} below shows a monitor template definition which cannot be defined in the existing CTL implementation of the EBA framework. 
+In the implementation of the Computation Tree Logic (CTL) bug checker specifications by Abal et. al., the checkers implement four predicates, forming the CTL formula $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$ \cite{Abal2017EffectiveBF}\cite{research-project}. This formula can also be written as $E\;[a\;\cup\;b\;\land\;EX\;E[c\;\cup\;d]]$. This limits the expressiveness of checks which can be defined, given that the logic for detecting bugs must be implemented within these four functions $a$, $b$, $c$ and $d$. Specifying the checkers as monitor templates therefore allows for greater expressiveness in the checker definition. To illustrate this, Figure \ref{expressive-monitor} below shows a monitor template definition which cannot be defined in the existing CTL implementation of the EBA framework. 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{evaluation/figures/monitor}
     \caption{An illustration of a monitor template which cannot be expressed by the CTL formula $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$.}
     \label{expressive-monitor}
+\end{figure}
+
+\newpar Another example of a structure that the CTL formulation cannot model is a very long sequence of given effects, e.g. an unlock and a lock repeatedly, followed by a final effect. This can be modelled using a monitor template defined as a loop between effects, going to the accepting state on the final effect. This is illustrated in Figure \ref{long-monitor}. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.35\textwidth]{evaluation/figures/long-monitor}
+    \caption{An illustration of a monitor template which cannot be expressed by the CTL formula $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$.}
+    \label{long-monitor}
 \end{figure}
 
 \newpar On the other hand, the CTL formula $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$ \textit{can} be expressed as a monitor template, as seen in Figure \ref{ctl-as-monitor}. 
@@ -50,8 +59,4 @@ In the implementation of the Computation Tree Logic (CTL) bug checker specificat
     \label{evaluation-table}
 \end{table}
 
-\newpar These false positives are mainly reported in loops. The unrolling of loops in EBA is the cause of these false positives, since monitor templates register loops as multiple repetitions of the same effect when an unrolled loop is encountered. In the case of unlocks, any unlock happening within a loop is therefore reported as a double unlock, since that is how the effect-CFG is structured. The existing implementation of EBA by Abal implements the concept of so-called "kill regions" in each bug checker, which will attempt to identify when the memory region being locked or unlocked is being overwritten as part of a loop and ignore this. This might in turn hide actual positives, bugs, in loops.
-
-\begin{itemize}
-    \item Possible comparison to BLAST and Cocinelle tools
-\end{itemize}
+\newpar These false positives are mainly reported in loops. The unrolling of loops in EBA is the cause of these false positives, since monitor templates register loops as multiple repetitions of the same effect when an unrolled loop is encountered. In the case of unlocks, any unlock happening within a loop is therefore reported as a double unlock, since that is how the effect-CFG is structured. The existing implementation of EBA by Abal implements the concept of so-called "kill regions" in each bug checker, which will attempt to identify when the memory region being locked or unlocked is being overwritten as part of a loop and ignore this. This will in turn hide bugs in loops.

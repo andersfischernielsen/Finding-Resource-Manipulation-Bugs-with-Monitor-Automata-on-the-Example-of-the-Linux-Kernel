@@ -1,9 +1,13 @@
 \section{Future Work}
 
-\begin{itemize}
-    \item Implement more monitor templates
-    \item Add more effects to EBA inference
-    \item Increase precision of EBA inference, leading to better \text{may} result, less false positives
-    \item Implement support for unsupported GCC output in EBA 
-    \item Add symbolic execution to increase precision
-\end{itemize}
+Implementing other bug checkers as monitor templates would allow EBA to detect these bug types. An implementation of a use-after-free bug checker could specifically prove very useful in detecting security risks in programs. This type of memory bug has been deemed as the cause for 70\% of the critical security vulnerabilities found in the popular Chromium browser, which is the base for Google's Chrome browser \cite{google-use-after-free}. This goes to show that this type of bug is prevalent in the wild and detecting such bugs in the Linux kernel would benefit the community surrounding the Linux kernel.
+
+\newpar The addition of more effect types to the EBA framework would allow defining a a bigger range of monitor templates, in turn enabling the detection of more bug types. Such effects could show effects of multi-threaded code, allowing the definition of bug checkers for concurrency errors. 
+
+\newpar The effect inference of the EBA framework could be improved upon in order to reduce the imprecision in the inferred effects. Currently, program points can have a wide range of effects after inference, leading to false positives. The inference of especially \textit{may} effects could possibly be improved in order to limit the exploration of program points which have none of the inferred possible effects when executed in practice. 
+
+\newpar The GCC compiler supports compiler extensions and the Linux kernel project utilizes some of these, specifically \textit{Static Assertions}, added in C11 which have been implemented since since GCC 4.6\footnote{See \textit{Programming Languages - C} \cite{ISO:2011:IIIb}} and \textit{Assembler Instructions with C Expression Operands}, an extension available since GCC 3.1\footnote{See \textit{Assembler Instructions with C Expression Operands} \cite{GCC:3.1}}. The use of these produces compiler output which EBA does not support and the analysis will therefore fail. Support for the output of recent versions of GCC would fix this issue. 
+
+\newpar Symbolic execution could be utilized in order to check the feasability of paths found in errors. Verifying that an execution path leading to a bug is actually reachable would increase the precision of bug checkers.  
+
+\todo[inline]{Write about reduction of false positive rate and that developers will not use a tool if it produces too much unnecessary output.}
