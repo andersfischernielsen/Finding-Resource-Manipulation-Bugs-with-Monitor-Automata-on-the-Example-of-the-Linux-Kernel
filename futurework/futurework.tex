@@ -10,4 +10,4 @@ Implementing other bug checkers as monitor templates would allow EBA to detect t
 
 \newpar Symbolic execution could be utilized in order to check the feasability of paths found in errors. Verifying that an execution path leading to a bug is actually reachable would increase the precision of bug checkers.  
 
-\todo[inline]{Write about reduction of false positive rate and that developers will not use a tool if it produces too much unnecessary output.}
+\newpar The number of false positives reported by the implementation of a double-unlock monitor template in this thesis should be improved upon. Johnson, Song, Murphy-Hill and Bowdidge \cite{false-positives} have concluded in their reseaarch that false positives is a key factor in developers choosing to not use static analysis tools. They note that future static analysis should strive to improve upon this problem in order to see increased use. The number of false positives in loops for the implementation presented in this thesis could be implemented through extensions to the output of EBA to expose information on loops in the effect-CFG or by implementing sophisticated filtering of bug checker output.
