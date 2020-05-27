@@ -1,3 +1,7 @@
 \section{Conclusion}
 
-\todo[inline]{Write conclusion.}
+This thesis has described \textit{shape-and-effect-inference} which allows the defintion of \textit{monitor templates} operate on \textit{effects} of program points in an \textit{effect-CFG}. I have defined monitor templates as state machines and defined several bug checkers as such monitor templates and presented the product construction of an effect-CFG and a monitor template as reasoning for the correctness of monitor templates. 
+
+\newpar Furthermore, I have described how monitor templates are implementated as well as shown how to implement monitor templates as an extension to the EBA framework in OCaml. Lastly, this implementation has been evaluated by comparing the implementation to previous work which has shown greater expressibility in which checkers can be defined and has shown a higher detection rate of an implemented of a bug checkers defined as a monitor template compared to the existing Computation Tree Logic (CTL) implementation. 
+
+\newpar Monitor templates have been shown to provide greater expressibility and they allow defining a multitude of bug checkers with an implementation performing better in testing on Linux kernel source files. Lastly, I have described possible future work which would improve upon this thesis by extensions to EBA and to the implementation of the monitor template implementation. 
