@@ -1,15 +1,15 @@
 \section{An Algorithm for Finding Bugs}
-In order to detect resource manipulation bugs, I will present an algorithm for detecting these bugs utilizing the region, shape and effect abstractions computed by EBA. I begin with defining \textit{monitor templates} as finite state machines operating on \textit{effects} and \textit{regions}, allowing the definition of bug behaviour and the detection of such behaviour. 
+In order to detect resource manipulation bugs, I will present an algorithm for detecting these bugs utilizing the region, shape and effect abstractions computed by EBA. I begin with defining \textit{monitor templates} as finite state machines operating on \textit{effects} and \textit{regions}, allowing the definition of buggy behaviour and the detection of such behaviour. 
 
 \newpar A finite state machine is a tuple $(\sum, S, s_0, \delta, F)$, where $\sum$ is an alphabet, $S$ is a finite non-empty set of states, $s_0$ is an element of $S$ and initial state, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$ and $F$ is the possibly empty set of final states and a subset of $S$. I will use such state machines to represent the code under analysis and the properties I wish to detect in input source files. 
 
 \subsection{Monitor Templates}
 \label{monitor-template-section}
-\noindent I use monitor automata to analyze the control flow of a given input source file and detect whether possible bug are present in. A monitor automaton changes state based on what is happening in the control flow of the program. When the automaton reaches an error state, then a possible bug has been discovered. The effect analysis provided by EBA allows monitoring which effects program points have, and monitor automata can then monitor these effects in order to determine whether possible bugs are present. 
+\noindent I use monitor automata to analyze the control flow of a given input source file and detect whether possible bugs are present. A monitor automaton changes state based on what is happening in the control flow of the program. When the automaton reaches an error state, then a possible bug has been discovered. The effect analysis provided by EBA allows monitoring which effects program points have, and monitor automata can then monitor these effects in order to determine whether possible bugs are present. 
 
 \newpar EBA infers what effects happen on a memory region, which is an abstract variable or value in the heap. Monitor automata track effects happening on a given region in order to determine whether they could be manifesting buggy behaviour. Both effects and regions must be tracked. For example, it is common to have multiple locks represented by different regions active simultaneously, but a lock on one region followed by a lock on a different region does not neccesarily mean that a locking bug is present unless these locks happen consequently on the same region. Monitor templates are defined formally as follows. 
 
-\newpar Given a region variable $\rho$, a monitor template is defined as the tuple $X_\rho (\sum, S, s_0, \delta, F, E)$ where $\sum$ is the alphabet of effects registered on memory objects represented by a region $\rho$, $S$ is a finite non-empty set of states, $s_0$ an initial state and an element of $S$, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$, $F$ is the non-empty set of final states and a subset of $S$, $E$ is the non-empty set of error states, and a subset of $F$. In other words, $X_\rho (\sum, S, s_0, \delta, F)$ is a finite state machine over regions and effects, augmented with the set of error states $E$. An illustration of such a monitor template can be seen in Figure \ref{double-unlock-automata-intro}. The monitor templates presently track a single region, $\rho$, but but this restriction is not essential and can be lifted if the need arises. 
+\newpar Given a region variable $\rho$, a monitor template is defined as the tuple $X_\rho (\sum, S, s_0, \delta, F, E)$ where $\sum$ is the alphabet of effects registered on memory objects represented by a region $\rho$, $S$ is a finite non-empty set of states, $s_0$ an initial state and an element of $S$, $\delta$ is the state-transition function $\delta: S \times \sum \rightarrow S$, $F$ is the non-empty set of final states and a subset of $S$, $E$ is the non-empty set of error states, and a subset of $F$. In other words, $X_\rho (\sum, S, s_0, \delta, F)$ is a finite state machine over regions and effects, augmented with the set of error states $E$. An illustration of such a monitor template can be seen in Figure \ref{double-unlock-automata-intro}. The monitor templates currently track a single region, $\rho$, but this restriction is not essential and can be lifted if the need arises. 
 
 \newpar From this definition, I distinguish two kinds of monitor templates: \textit{long-term} and \textit{short-term}. \textit{Short-term} templates will monitor effects happening on a region only until a final state or error state is reached. \textit{Long-term} templates operate as \textit{short-term} templates, though they only include a single final state, which is the error state. They will therefore monitor indefinititely until only an error-state is found; no early termination is possible. This distinction is made since early termination of monitors might result in performance improvements in the implementation of these monitors, since it may especially reduce the number of monitors active in the analyzers' memory. 
 
@@ -54,7 +54,7 @@ A double-lock monitor detects two consecutive locks on a memory location with no
     \item $\sum = \{lock_\rho, unlock_\rho\}$, a subset of $E$
     \item $S = \{ locked, unlocked, error \}$
     \item $s_0 = unlocked$ 
-    \item $\delta =$ the relation $\{(unlocked, lock_\rho, locked), (locked, unlock_\rho, unlocked), \\
+    \item $\delta =$ the relation $\{(unlocked, lock_\rho, locked), (locked, unlock_\rho, unlocked_{final}), \\
     (locked, lock_\rho, error), (unlocked, unlock_\rho, unlocked)\}$ 
     \item $E = \{ error \}$  
     \item $F = \{ unlocked, error \}$
@@ -195,7 +195,7 @@ EBA provides a representation of the control flow of the input source files whic
     \hspace{2cm}
     \begin{prooftree}
         \hypo{s'_1 \xrightarrow{E} s'_2}
-        \hypo{\forall e \in \sum\:.\:s_1 \centernot{\xrightarrow{\bar{e}}}}
+        \hypo{\forall e \in E\:.\:s_1 \centernot{\xrightarrow{\bar{e}}}}
         \infer2{(s_1, s'_1) \xrightarrow{E} (s_1, s'_2)}
     \end{prooftree}
 \end{center}
@@ -204,7 +204,7 @@ EBA provides a representation of the control flow of the input source files whic
     
 \newpar It is necessary to define rules for the state changes within this product, given that a monitor only accepts effects on a given region. $E$ is the set of effects happening in a given program step, $s'_1 \rightarrow s'_2$. The monitor state $s_1$ will change given that the transition happens on the effect $e$, present in $E$. If this is not the case, the control flow will have changed state to $s'_2$, while the monitor has not and stays the same, i.e. $s_1$. 
 
-\newpar In other words, the state of the automata should not change if the effect does not happen on the monitored region, but the automaton representing the control flow \textit{should}. The observant reader might notice that if regions are no longer present since they go out of scope scope in a given program, only the rightmost of the two previous inference rules is relevant. This is an opportunity for an optimization in a bug checker, which is presently not exploited. Taking scopes into account would complicate the product construction significantly and the reader might appreciate not having to reason about more convoluted definitions. Lack of scope information does lead to the question of whether these \textit{"dangling"} regions incur a significant performance cost when implemented. I will investigate and evaluate this in later sections.
+\newpar In other words, the state of the automata should not change if the effect does not happen on the monitored region, but the automaton representing the control flow \textit{should}. The observant reader might notice that if regions are no longer present since they go out of scope in a given program, only the rightmost of the two previous inference rules is relevant. This is an opportunity for an optimization in a bug checker, which is presently not exploited. Taking scopes into account would complicate the product construction significantly and the reader might appreciate not having to reason about more convoluted definitions. Lack of scope information does lead to the question of whether these \textit{"dangling"} regions incur a significant performance cost when implemented. I will investigate and evaluate this in later sections.
 
 \newpar The product of the control flow example shown in Figure \ref{cfg_example-automaton} and a generated double-unlock monitor automaton can now be found in order to demonstrate that a possible bug is detected by the monitor, resulting in the following definition. This definition is illustrated in Figure \ref{cfg_unlock-product}. 
 
@@ -220,7 +220,7 @@ EBA provides a representation of the control flow of the input source files whic
             \end{aligned}
         $
     }
-    \item $s_0 = (1, unlocked)$ 
+    \item $s_0 = (unlocked, 1)$ 
     \item {
         $
             \begin{aligned}[t]
@@ -243,7 +243,7 @@ EBA provides a representation of the control flow of the input source files whic
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{algorithm/figures/cfg_unlock-product}
-    \caption{An illustration of the product construction of a double-unlock monitor automata and a control flow.}
+    \caption{An illustration of the product construction of a double-unlock monitor automata and a control flow automaton.}
     \label{cfg_unlock-product}
 \end{figure}
 

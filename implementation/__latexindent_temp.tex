@@ -38,7 +38,7 @@
     \label{multiple-region-example}
 \end{figure}
 
-\noindent All permutations of the set of effects must therefore be found and mapped to a given region, while also preserving the information of the other permutations for that given region. Furthermore, the transition function of the monitor automata must be evaluated on the current input, resulting in a new state of that automata which again must also be stored for that region, as defined in the product rules previously in Section \ref{control-flow-section}.
+\noindent All permutations of the set of effects must therefore be found and mapped to a given region while preserving the information of the other permutations for that given region. Furthermore, the transition function of the monitor automata must be evaluated on the current input, resulting in a new state of that automata which again must be stored for that region, as defined in the product rules previously in Section \ref{control-flow-section}.
 
 \newpar In order to accomplish this, the current state of the monitor monitoring a region needs to be copied and applied as the current state of the monitor for each permutation found for a given set of effects. This is done in order to find all possible states of the monitor when given all effect orderings as input. This can also be thought of as if the control flow is being interpreted as non-deterministic. Recall that the rules for computing the transition relation of a product in Section \ref{control-flow-section} are non-deterministic, since the syncronizing effect is picked from a set non-deterministically.
 
@@ -63,13 +63,13 @@
 
 \newpar Monitors are instantiated whenever a new region is encountered and are then stored in this map. If a given region is already present in the map, then the current state of the monitor(s) monitoring the region are applied on the transition function of the monitor(s). If the region is not already present in the map, a monitor is instantiated for each effect happening in the program point where this region was encountered. Given that the map maps a region to the state of monitor automata, the length of the map will never be larger than the number of regions in the input source file. The size of the set of possible monitor automata states for a given region depends on the effects of a statement operating on a given region, though this can be improved by filtering effects, as we will see shortly. 
 
-\newpar Given a large number of possible effects of a statement the resulting set of permutations of these effects will naturally grow. A set of $N$ effects will result in $N!$ permutations; in other words, the number of monitor states for a given region will therefore in the worst case be $|\mathit{effects}|!$. This $N$ can be reduced by only applying effects to monitors which are of interest, namely effects which are in the alphabet, $\sum$, of the monitor template definition. Effects are only applied to the monitors monitoring a region if the alphabet of the monitor in question accepts this effect, in other words utilizing the product construction inference rules defined in Chapter \ref{control-flow-section}.  Filtering effects caused by a program point to only include elements in $\sum$ greatly reduces the number of monitors states, though this is inherently dependent on the template definition. Definitions with a restricted alphabet will perform better. 
+\newpar Given a large number of possible effects of a statement the resulting set of permutations of these effects will naturally grow. A set of $N$ effects will result in $N!$ permutations; in other words, the number of monitor states for a given region will therefore in the worst case be $|\mathit{effects}|!$. This $N$ can be reduced by only applying effects to monitors which are of interest, namely effects which are in the alphabet, $\sum$, of the monitor template definition. Effects are only applied to the monitors monitoring a region if the alphabet of the monitor in question accepts this effect, in other words utilizing the product construction inference rules defined in Chapter \ref{control-flow-section}.  Filtering effects caused by a program point to only include elements in $\sum$ greatly reduces the number of monitor states, though this is inherently dependent on the template definition. Definitions with a restricted alphabet will perform better. 
 
 \newpar The full implementation of monitor templates therefore works by:
 
 \begin{itemize}
     \item Taking a source file and a function declaration within that source file, both provided by EBA
-    \item Extracting information about the provided function and verifies that the function is non-static
+    \item Extracting information about the provided function and verifying that the function is non-static
     \item Invoking the CFG-generation of EBA of the provided function
     \item Exploring the effect CFG provided by EBA while invoking the transition function of monitor templates
     \item Filtering the resulting map of monitor states
@@ -181,7 +181,7 @@
 
 \newpar Monitor automata are used to detect bugs over control flow graphs. The control flow graph is provided by the EBA framework, while the monitor automata have been defined and implemented as part of this thesis. These bug checkers must conform to the existing signatures of EBA in order to allow the framework to instantiate a given bug checker after which an abstract representation of the input source file is passed to the instantiated checker. 
 
-\newpar A signature which allows instantiation of monitor automata bug checkers has been defined as part of this thesis. This signature is then implemented in order to let EBA instantiate the implemented checker. A function, \texttt{check}, is the only requirement for implementing this signature and takes two parameters after which it returns a list of strings for each detected possible bug in the input source file as expected by the EBA framework. These parameters are the abstractions of the input file and each global function defined in this file, both of which are passed to the function by the framework. This mimics the implementation of the existing CTL checkers in EBA and allows for easy integration into the framework. A snippet of the \texttt{Make} signature can is shown in Figure \ref{make-signature}.
+\newpar A signature which allows instantiation of monitor automata bug checkers has been defined as part of this thesis. This signature is then implemented in order to let EBA instantiate the implemented checker. A function, \texttt{check}, is the only requirement for implementing this signature and takes two parameters after which it returns a list of strings for each detected possible bug in the input source file as expected by the EBA framework. These parameters are the abstractions of the input file and each global function defined in this file, both of which are passed to the function by the framework. This mimics the implementation of the existing CTL checkers in EBA and allows for easy integration into the framework. A snippet of the \texttt{Make} signature is shown in Figure \ref{make-signature}.
 
 \begin{figure}[H]
     \centering
@@ -233,11 +233,10 @@
             let states = Map.values results in
             let matches = Enum.fold (fun acc m -> 
                 (List.filter A.is_accepting m) @ acc) [] states in
-            let matches_reversed = List.rev matches in 
             let function_name = Cil.(variable_info.vname) in 
-            let pp = List.map (fun m -> A.pp_checker_state m function_name) 
-                matches_reversed in
-            let pp_list = List.map (fun m -> PP.to_string m) pp in
+            let print = List.map (fun m -> A.pp_checker_state m function_name) 
+                matches in
+            let pp_list = List.map (fun m -> PP.to_string m) print in
             L.of_list pp_list
     \end{minted}
     \caption{The implementation of \texttt{check} initializing the control flow generation using EBA.}

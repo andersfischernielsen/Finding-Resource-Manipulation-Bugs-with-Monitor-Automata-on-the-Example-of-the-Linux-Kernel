@@ -2,25 +2,27 @@
 
 \subsection{Expressiveness}
 
-In the implementation of the Computation Tree Logic (CTL) bug checker specifications by Abal et. al., the checkers implement four predicates, forming the CTL formula of the shape $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$ \cite{Abal2017EffectiveBF}\cite{research-project}. This formula can also be written as $E\;a\;\text{U}\;(b\;\land\;EX\;(E\;c\;\text{U}\;d))$. This limits the expressiveness of checks which can be defined, given that the logic for detecting bugs must be implemented within these four functions $a$, $b$, $c$ and $d$. Specifying the checkers as monitor templates therefore allows for greater expressiveness in the checker definition. To illustrate this, Figure \ref{expressive-monitor} below shows a monitor template definition which cannot be defined in the existing CTL implementation of the EBA framework because there is no way to express the circular alternation.
+In the implementation of the Computation Tree Logic (CTL) bug checker specifications by Abal et. al., the checkers implement four predicates, forming the CTL template formula of the shape $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$ \cite{Abal2017EffectiveBF}\cite{research-project}. This formula can also be written as $E\;a\;\text{U}\;(b\;\land\;EX\;(E\;c\;\text{U}\;d))$. This limits the expressiveness of checks which can be defined, given that the logic for detecting bugs must be implemented within these four functions $a$, $b$, $c$ and $d$. Specifying the checkers as monitor templates therefore allows for greater expressiveness in the checker definition. To illustrate this, Figure \ref{expressive-monitor} below shows a monitor template definition which cannot be defined in the existing CTL implementation of the EBA framework because there is no way to express the circular alternation.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{evaluation/figures/monitor}
-    \caption{An illustration of a monitor template which cannot be expressed by the CTL formula $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$.}
+    \caption{An illustration of a monitor template which cannot be expressed by the CTL template formula $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$.}
     \label{expressive-monitor}
 \end{figure}
 
-\newpar Another example of a structure that the CTL formulation cannot model is a very long sequence of given effects, e.g. an unlock and a lock repeatedly, followed by a final effect. This can be modelled using a monitor template defined as a loop between effects, going to the accepting state on the final effect. This is illustrated in Figure \ref{long-monitor}. 
+\newpar Another example of a structure that the CTL template formulation cannot model is a very long sequence of given effects, e.g. an unlock and a lock repeatedly, followed by a final effect. This can be modelled using a monitor template defined as a loop between effects, going to the accepting state on the final effect. This is illustrated in Figure \ref{long-monitor}. 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.35\textwidth]{evaluation/figures/long-monitor}
-    \caption{An illustration of a monitor template which cannot be expressed by the CTL formula $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$.}
+    \caption{An illustration of a monitor template which cannot be expressed by the CTL template formula $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$.}
     \label{long-monitor}
 \end{figure}
 
-\newpar On the other hand, the CTL formula $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$ \textit{can} be expressed as a monitor template, as seen in Figure \ref{ctl-as-monitor}. 
+\newpar I want to argue why this figure cannot be expressed in the CTL template. The CTL template has a shape with two EU operators, $a\;\text{EU}\;(...)$ and $c\;\text{EU}\;d$. Each of these operators enforce that the rightmost argument appears, but not necessarily the left, e.g. in $c\;\text{EU}\;d$ $d$ must appear while $c$ may or may not appear. Moreover, the left element can appear more than once. In the CTL template we only have two positions where we can enforce appearance and prevent repetition, on the righthand side of each $\text{EU}$. The monitor template in Figure \ref{long-monitor} requires strict alternation between any number of $x$ and $y$, so before any $y$ there is an $x$. Without a looping construct in the CTL template and only two positions where we force appearance and do not allow repetition, we can not express any alternations between repeating symbols of a length greater than two. 
+
+\newpar On the other hand, the CTL template formula $a\;\text{EU}\;(b\;\land\;EX\;(c\;\text{EU}\;d))$ \textit{can} be expressed as a monitor template, as seen in Figure \ref{ctl-as-monitor}. 
 
 \begin{figure}[H]
     \centering
@@ -29,7 +31,7 @@ In the implementation of the Computation Tree Logic (CTL) bug checker specificat
     \label{ctl-as-monitor}
 \end{figure}
 
-\newpar This expressiveness allows specifying the CTL checkers defined in the work by Abal et. al and also possible future more granular checkers, in other words increasing the posibilities of extending the EBA framework. Certain bug types can show themselves in different code constructions, such as a double-unlock bug being defined as both an unlock happening before any locks happening and explicit double-unlocks. The expressiveness of monitor templates allows specifying multiple types of behaviour in the code under analysis for a single bug type as more complex transition function in order to increase the precision of checks.
+\newpar This expressiveness allows specifying the CTL template checkers defined in the work by Abal et. al and also possible future more granular checkers, in other words increasing the posibilities of extending the EBA framework. Certain bug types can show themselves in different code constructions, such as a double-unlock bug being defined as both an unlock happening before any locks happening and explicit double-unlocks. The expressiveness of monitor templates allows specifying multiple types of behaviour in the code under analysis for a single bug type as more complex transition function in order to increase the precision of checks.
 
 \subsection{Accuracy}
 
@@ -44,33 +46,33 @@ Experimental static analysis has recently been added to the GCC compiler chain \
     \setlength{\tabcolsep}{5pt}
     \renewcommand{\arraystretch}{1.25}
     \scriptsize
-    \begin{tabular}{lllll}
-    \textbf{Linux Kernel File}                    & \textbf{Present in}          & \textbf{My Approach}  & \textbf{Previous Approach} & \textbf{Patched in} \\
+    \begin{tabular}{llllllll}
+    \textbf{Linux Kernel File}                    & \textbf{Lines} & \textbf{Patched in} & \textbf{Present in} & \textbf{Time} & \textbf{Mine} & \textbf{EBA} & \textbf{FP} \\
     \hline
-    drivers/block/drbd/drbd\_main.c               & \texttt{b0814361}            & Detected              & Not detected               & \texttt{8e9c5230}            \\
-    fs/ubifs/orphan.c                             & \texttt{7542c6de}            & Detected              & Detected                   & \texttt{4dd75b33}            \\
-    drivers/gpu/drm/nouveau/nouveau\_svm.c        & \texttt{5fbcf501}            & Not detected          & Not detected               & \texttt{de4ee728}            \\
-    fs/btrfs/file.c                               & \texttt{78e03651}            & Not detected          & Not detected               & \texttt{f49aa1de}            \\
-    drivers/staging/wilc1000/wilc\_wlan.c         & \texttt{ca641bae}            & Not detected          & Not detected               & \texttt{fea69916}            \\
-    drivers/staging/kpc2000/kpc\_dma/fileops.c    & \texttt{d4c596eb}            & Not detected          & Not detected               & \texttt{c85aa326}            \\
-    fs/nfs/client.c                               & \texttt{a46126cc}            & Not detected          & Not detected               & \texttt{c260121a}            \\
-    fs/btrfs/file.c                               & \texttt{2b90883c}            & Not detected          & Not detected               & \texttt{8fca9550}            \\
-    drivers/media/dvb-core/dvbdev.c               & \texttt{ded71626}            & Internal error        & Internal error             & \texttt{122d0e8d}            \\
-    mm/memory\_hotplug.c                          & \texttt{6376360e}            & Not detected          & Not detected               & \texttt{e3df4c6e}            \\
-    sound/soc/codecs/pcm512x.c                    & \texttt{fd270fca}            & Not detected          & Not detected               & \texttt{28b698b7}            \\
-    drivers/target/target\_core\_user.c           & \texttt{807cf197}            & Not detected          & Not detected               & \texttt{f0e89aae}            \\
-    drivers/rpmsg/qcom\_smd.c                     & \texttt{fb416f69}            & Internal error        & Internal error             & \texttt{c3388a07}            \\
-    drivers/scsi/aacraid/commsup.c                & \texttt{09624645}            & Not detected          & Not detected               & \texttt{d844752e}            \\
-    drivers/staging/rtl8188eu/os\_dep/usb\_intf.c & \texttt{612e1c94}            & Compile error         & Compile error              & \texttt{23bf4042}            \\
-    block/blk-cgroup.c                            & \texttt{e0223003}            & Compile error         & Compile error              & \texttt{bbb427e3}  
+    drivers/block/drbd/drbd\_main.c               & 3928           & \texttt{8e9c5230}   & \texttt{b0814361}   & 25.93s        & +             & -            & 0           \\
+    fs/ubifs/orphan.c                             & 1042           & \texttt{4dd75b33}   & \texttt{7542c6de}   & 1.03s         & +             & +            & 6           \\
+    drivers/gpu/drm/nouveau/nouveau\_svm.c        & 875            & \texttt{de4ee728}   & \texttt{5fbcf501}   & 0.97s         & -             & -            & 0           \\
+    fs/btrfs/file.c                               & 3358           & \texttt{f49aa1de}   & \texttt{78e03651}   & 2.93s         & -             & -            & 0           \\
+    drivers/staging/wilc1000/wilc\_wlan.c         & 1346           & \texttt{fea69916}   & \texttt{ca641bae}   & 1.26s         & +             & -            & 1           \\
+    drivers/staging/kpc2000/kpc\_dma/fileops.c    & 420            & \texttt{c85aa326}   & \texttt{d4c596eb}   & 0.74s         & -             & -            & 0           \\
+    fs/nfs/client.c                               & 1311           & \texttt{c260121a}   & \texttt{a46126cc}   & 1.79s         & -             & -            & 1           \\
+    fs/btrfs/file.c                               & 3358           & \texttt{8fca9550}   & \texttt{2b90883c}   & 2.93s         & -             & -            & 0           \\
+    drivers/media/dvb-core/dvbdev.c               & 1076           & \texttt{122d0e8d}   & \texttt{ded71626}   & 0.55s         & \%            & \%           & 0           \\
+    mm/memory\_hotplug.c                          & 1867           & \texttt{e3df4c6e}   & \texttt{6376360e}   & 1.51s         & -             & -            & 0           \\
+    sound/soc/codecs/pcm512x.c                    & 1721           & \texttt{28b698b7}   & \texttt{fd270fca}   & 1.06s         & -             & -            & 0           \\
+    drivers/target/target\_core\_user.c           & 2735           & \texttt{f0e89aae}   & \texttt{807cf197}   & 0.82s         & \%            & \%           & 0           \\
+    drivers/rpmsg/qcom\_smd.c                     & 1532           & \texttt{c3388a07}   & \texttt{fb416f69}   & 0.40s         & \%            & \%           & 0           \\
+    drivers/scsi/aacraid/commsup.c                & 2615           & \texttt{d844752e}   & \texttt{09624645}   & 5.51s         & -             & -            & 2           \\
+    drivers/staging/rtl8188eu/os\_dep/usb\_intf.c & 531            & \texttt{23bf4042}   & \texttt{612e1c94}   & -             & ?             & ?            & -           \\
+    block/blk-cgroup.c                            & 1422           & \texttt{bbb427e3}   & \texttt{e0223003}   & -             & ?             & ?            & -           
     \end{tabular}
-    \caption{The results of comparing the previous CTL-based approach to my monitor-template-based approach.}
+    \caption{The results of comparing the previous CTL-based approach to my monitor-template-based approach. The symbol \textbf{+} indicates that the bug was detected, \textbf{-} indicates that the bug was not detected, \textbf{\%} indicates an internal error in EBA and \textbf{?} indicates a compilation error. The column named FP indicates the number of false positives by the implementation using monitor templates reported in a file.}
     \label{evaluation-table}
 \end{table}
 
-\newpar The files \texttt{drbd\_main.c} and \texttt{orphan.c} are successfully detected. Both of these files have a double-unlock in an if-statement which, when true, results in a double-unlock bug. In the case of the file \texttt{drbd\_main.c} by the use of mutexes, by a spin-unlock in the file \texttt{orphan.c}. 
+\newpar The files \texttt{drbd\_main.c}, \texttt{orphan.c} and \texttt{wilc\_wlan.c} are successfully detected. Both of these files have a double-unlock in an if-statement which, when true, results in a double-unlock bug. In the case of the file \texttt{drbd\_main.c} by the use of mutexes, by a spin-unlock in the file \texttt{orphan.c}. 
 
-\newpar The files \texttt{nouveau\_svm.c}, \texttt{fileops.c}, \texttt{file.c} and \texttt{memory\_hotplug.c} are not detected by either approach. These files exhibit a double-unlock bug when certain error codes are reported during execution, but unlocking happens by the use of an external function and is therefore not detected as an unlock by EBA. The file \texttt{wilc\_wlan.c} also contains a bug due to the use of an external unlock function, again not detected as an unlock by EBA, which was executed twice in succession under certain conditions.
+\newpar The files \texttt{nouveau\_svm.c}, \texttt{fileops.c}, \texttt{file.c} and \texttt{memory\_hotplug.c} are not detected by either approach. These files exhibit a double-unlock bug when certain error codes are reported during execution, but unlocking happens by the use of an external function and is therefore not detected as an unlock by EBA.
 
 \newpar The files \texttt{pcm512x.c} and \texttt{target\_core\_user.c} contain double mutex unlocks similar to \texttt{drbd\_main.c}, but these bugs are within static functions and are therefore ignored. The files \texttt{qcom\_smd.c} and \texttt{commsup.c} unlock using goto-statements, either resulting in EBA giving an internal error or not detecting the unlocks. 
 
@@ -78,4 +80,4 @@ Experimental static analysis has recently been added to the GCC compiler chain \
 
 \newpar Remaining false positives are mainly reported in when an unlock is detected before the region the unlock happens on has been locked, as per the POSIX defintion of a double-unlock \cite{unlockPOSIX}. This is an unfortunate effect of the single-file analysis of EBA. Memory regions can have been unlocked elsewhere than the code under analysis if the file being analyses is part of a module consisting of several files. 
 
-\newpar This evaluation has allowed me to answer part of my research question \textit{"How effective are such [monitor template] checker definitions?"}. The accuracy of the implementation of a double-unlock bug checker using monitor templates is higher than the previous approach. It is furthermore possible to express more complex bug checkers using monitor templates compared to the CTL-based checker implementation, giving greater expressibility. In summary; though not all confirmed bugs are detected, a higher accuracy is observed when using monitor templates and monitor templates allow for greater expressibility when defining bug checkers. 
+\newpar This evaluation has allowed me to answer part of my research question \textit{"How effective are such monitor template-based checker definitions?"}. The accuracy of the implementation of a double-unlock bug checker using monitor templates is higher than the previous approach. It is furthermore possible to express more complex bug checkers using monitor templates compared to the CTL template-based checker implementation, giving greater expressibility. In summary; though not all confirmed bugs are detected, a higher accuracy is observed when using monitor templates and monitor templates allow for greater expressibility when defining bug checkers. 
