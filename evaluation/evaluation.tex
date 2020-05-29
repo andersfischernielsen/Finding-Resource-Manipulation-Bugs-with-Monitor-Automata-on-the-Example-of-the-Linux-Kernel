@@ -68,7 +68,7 @@ Experimental static analysis has recently been added to the GCC compiler chain \
     \label{evaluation-table}
 \end{table}
 
-\newpar The files \texttt{drbd\_main.c} and \texttt{orphan.c} are successfully detected. Both of these files have a double-unlock in an if-statement which, when true, result in a double-unlock bug. In the case of the file \texttt{drbd\_main.c} by the use of mutexes, by a spin-unlock in the file \texttt{orphan.c}. 
+\newpar The files \texttt{drbd\_main.c} and \texttt{orphan.c} are successfully detected. Both of these files have a double-unlock in an if-statement which, when true, results in a double-unlock bug. In the case of the file \texttt{drbd\_main.c} by the use of mutexes, by a spin-unlock in the file \texttt{orphan.c}. 
 
 \newpar The files \texttt{nouveau\_svm.c}, \texttt{fileops.c}, \texttt{file.c} and \texttt{memory\_hotplug.c} are not detected by either approach. These files exhibit a double-unlock bug when certain error codes are reported during execution, but unlocking happens by the use of an external function and is therefore not detected as an unlock by EBA. The file \texttt{wilc\_wlan.c} also contains a bug due to the use of an external unlock function, again not detected as an unlock by EBA, which was executed twice in succession under certain conditions.
 
