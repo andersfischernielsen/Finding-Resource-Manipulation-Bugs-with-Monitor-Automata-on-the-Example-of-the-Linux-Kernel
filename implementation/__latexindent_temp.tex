@@ -1,7 +1,7 @@
 \section{Finding Double-Unlock Bugs in Practice}
 \label{implementation}
 
-\noindent This section will detail how I have implemented the abstractions defined previously and integrated this implementation into the EBA framework in order to explore the product of the control flow graph of input programs and monitor automata to detect possible bugs. 
+\noindent This section will detail how I have implemented the abstractions defined previously and integrated this implementation into the EBA framework in order to explore the product of the control flow graph of input programs and monitor automata to detect possible bugs, answering part of my research question: \textit{"How can bug checkers using monitor templates be implemented as an extension to the Effective Bug Finding (EBA) framework operating on the Linux kernel?"}.
 
 \subsection{Implementing Monitor Templates}
 \newpar Monitor automata are used to detect bugs over control flow graphs. The control flow graph is provided by the EBA framework, while the monitor automata have been defined and implemented as part of this thesis. The framework will then instantiate a given bug checker after which an abstract representation of the input source file is passed to the instantiated checker. 
