@@ -1,193 +1,25 @@
-@inproceedings{Abal2017EffectiveBF,
-  title={Effective Bug Finding in C Programs with Shape and Effect Abstractions},
-  author={Iago Abal and Claus Brabrand and Andrzej Wasowski},
-  booktitle={VMCAI},
-  year={2017}
-}
+% !TeX spellcheck = en_GB
+\documentclass[a4paper]{article}
+\input{preamble}
 
-@inproceedings{EffectiveBugFinding,
-author = {Abal, Iago and Brabrand, Claus and Wasowski, Andrzej},
-year = {2017},
-month = {01},
-pages = {34-54},
-title = {Effective Bug Finding in C Programs with Shape and Effect Abstractions},
-isbn = {978-3-319-52233-3},
-doi = {10.1007/978-3-319-52234-0_3}
-}
+\title{Finding Resource Manipulation Bugs with Monitor Automata on the Example of the Linux Kernel}
+\author{Anders Fischer-Nielsen\\\textit{afin@itu.dk}\\\\KISPECI1SE}
+\date{June 2020}
 
-@online{unlockPOSIX, 
-title = {pthread\_spin\_unlock - unlock a spin lock object}, 
-author = {IEEE and The Open Group},
-url = {https://pubs.opengroup.org/onlinepubs/9699919799/}, 
-journal = {The Open Group Base Specifications Issue 7, 2018 edition}, 
-publisher = {IEEE and The Open Group}, 
-year = 2017,
-note = {Accessed: 2019-11-25},
-urldate = {2019-11-25},
-howpublished = {\url{https://pubs.opengroup.org/onlinepubs/9699919799/}},
-}
-
-@article{Godefroid,
- author = {Godefroid, Patrice and Nori, Aditya V. and Rajamani, Sriram K. and Tetali, Sai Deep},
- title = {Compositional May-must Program Analysis: Unleashing the Power of Alternation},
- journal = {SIGPLAN Not.},
- issue_date = {January 2010},
- volume = {45},
- number = {1},
- month = jan,
- year = {2010},
- issn = {0362-1340},
- pages = {43--56},
- numpages = {14},
- url = {http://doi.acm.org/10.1145/1707801.1706307},
- doi = {10.1145/1707801.1706307},
- acmid = {1706307},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {abstraction refinement, directed testing, software model checking},
-} 
-
-@book{ISO:2011:IIIb,
-  title = {ISO/IEC 9899:1999(E) - Programming Languages - C},
-  pages = {169},
-  year = {1999},
-  address = {Geneva, Switzerland},
-  author = {ISO},
-  bibdate = {Mon Dec 19 11:12:12 2011},
-  bibsource = {http://www.math.utah.edu/pub/tex/bib/isostd.bib}
-}
-
-@online{GCC:3.1, 
-title = {Assembler Instructions with C Expression Operands}, 
-author = {Free Software Foundation, Inc.},
-year = 2002,
-url = {https://gcc.gnu.org/onlinedocs/gcc-3.1/gcc/Extended-Asm.html}, 
-journal = {GCC Online Docs}, 
-publisher = {Free Software Foundation Inc.}, 
-note = {Accessed: 2019-11-25},
-urldate = {2019-11-25},
-howpublished = {\url{https://gcc.gnu.org/onlinedocs/gcc-3.1/gcc/Extended-Asm.html}},
-}
-
-@inproceedings{cil,
-  title={CIL: Intermediate language and tools for analysis and transformation of C programs},
-  author={Necula, George C and McPeak, Scott and Rahul, Shree P and Weimer, Westley},
-  booktitle={International Conference on Compiler Construction},
-  pages={213--228},
-  year={2002},
-  organization={Springer}
-}
-
-@article{cfg, author = {Allen, Frances E.},
-title = {Control Flow Analysis},
-year = {1970},
-issue_date = {July 1970},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-volume = {5},
-number = {7},
-issn = {0362-1340},
-url = {https://doi.org/10.1145/390013.808479},
-doi = {10.1145/390013.808479},
-journal = {SIGPLAN Not.},
-month = jul,
-pages = {1–19},
-numpages = {19} 
-}
-
-@online{gcc10, author = {Free Software Foundation, Inc.},
-title={GCC 10 Release Series}, 
-year = 2020,
-url={https://gcc.gnu.org/gcc-10/changes.html}, 
-howpublished = {\url{https://gcc.gnu.org/gcc-10/changes.html}},
-journal={GCC 10 Release Series - Changes, New Features, and Fixes - GNU Project - Free Software Foundation (FSF)}, 
-note = {Accessed: 2020-05-11},
-urldate = {2020-05-11},
-publisher={Free Software Foundation, Inc.}, 
-year={2020}, 
-month={May}
-}
-
-@online{gcc10-development, 
-title={Static analysis in GCC 10}, 
-author = {Malcolm, David},
-year = 2020,
-url={https://developers.redhat.com/blog/2020/03/26/static-analysis-in-gcc-10/}, 
-howpublished = {\url{https://developers.redhat.com/blog/2020/03/26/static-analysis-in-gcc-10/}},
-note = {Accessed: 2020-05-13},
-urldate = {2020-05-13},
-publisher={Red Hat, Inc.}, 
-year={2020}, month={May}
-}
-
-@online{curl-static-analysis, 
-title={Daniel Stenberg}, 
-author = {Stenberg, Daniel},
-year = 2020,
-url={https://twitter.com/bagder/status/1252900440305537025}, 
-howpublished = {\url{https://twitter.com/bagder/status/1252900440305537025}},
-note = {Accessed: 2020-05-13},
-urldate = {2020-05-13},
-publisher={Twitter, Inc.}, 
-year={2020}, month={May}
-}
-
-@unpublished{research-project,
-  author = {Anders Fischer-Nielsen},
-  title  = {Finding Double-Unlock Bugs with Shape-and-Effect Analysis},
-  note   = {Project Report available at: \url{https://github.com/andersfischernielsen/Finding-Double-Unlock-Bugs-with-Shape-and-Effect-Analysis/raw/master/report.pdf}},
-  year   = {2019}
-}
-
-@online{google-use-after-free, 
-title={Memory Safety}, 
-author = {Chromium Project, The},
-year = 2020,
-url={https://www.chromium.org/Home/chromium-security/memory-safety}, 
-howpublished = {\url{https://www.chromium.org/Home/chromium-security/memory-safety}},
-note = {Accessed: 2020-05-24},
-urldate = {2020-05-24},
-publisher={The Chromium Project}, 
-year={2020}, month={May}
-}
-
-@inproceedings{false-positives, author = {Johnson, Brittany and Song, Yoonki and Murphy-Hill, Emerson and Bowdidge, Robert}, 
-title = {Why Don’t Software Developers Use Static Analysis Tools to Find Bugs?},
-year = {2013},
-isbn = {9781467330763},
-publisher = {IEEE Press},
-booktitle = {Proceedings of the 2013 International Conference on Software Engineering},
-pages = {672–681},
-numpages = {10},
-location = {San Francisco, CA, USA}, 
-series = {ICSE ’13} 
-}
-
-@article{SDV, author = {Ball, Thomas and Bounimova, Ella and Cook, Byron and Levin, Vladimir and Lichtenberg, Jakob and McGarvey, Con and Ondrusek, Bohus and Rajamani, Sriram K. and Ustuner, Abdullah}, title = {Thorough Static Analysis of Device Drivers}, year = {2006}, issue_date = {October 2006}, publisher = {Association for Computing Machinery}, address = {New York, NY, USA}, volume = {40}, number = {4}, issn = {0163-5980}, url = {https://doi.org/10.1145/1218063.1217943}, doi = {10.1145/1218063.1217943}, journal = {SIGOPS Oper. Syst. Rev.}, month = apr, pages = {73–85}, numpages = {13}, keywords = {software model checking, formal verification} }
- 
-@article{SLAM, author = {Ball, Thomas and Rajamani, Sriram K.}, title = {The SLAM Project: Debugging System Software via Static Analysis}, year = {2002}, issue_date = {Jan. 2002}, publisher = {Association for Computing Machinery}, address = {New York, NY, USA}, volume = {37}, number = {1}, issn = {0362-1340}, url = {https://doi.org/10.1145/565816.503274}, doi = {10.1145/565816.503274}, journal = {SIGPLAN Not.}, month = jan, pages = {1–3}, numpages = {3} }
-
-@inproceedings{infer, author = {Calcagno, Cristiano and Distefano, Dino and O’Hearn, Peter and Yang, Hongseok}, title = {Compositional Shape Analysis by Means of Bi-Abduction}, year = {2009}, isbn = {9781605583792}, publisher = {Association for Computing Machinery}, address = {New York, NY, USA}, url = {https://doi.org/10.1145/1480881.1480917}, doi = {10.1145/1480881.1480917}, booktitle = {Proceedings of the 36th Annual ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages}, pages = {289–300}, numpages = {12}, keywords = {proof theory, program analysis, abduction}, location = {Savannah, GA, USA}, series = {POPL ’09} }
-
-@inproceedings{smatch,
-  title={Checking System Rules Using System-Specific, Programmer-Written Compiler Extensions},
-  author={Engler, Dawson and Chelf, Benjamin and Chou, Andy and Hallem, Seth},
-  booktitle={OSDI},
-  year={2000},
-  publisher = {USENIX Association},
-  booktitle = {Proceedings of the 4th Conference on Symposium on Operating System Design & Implementation - Volume 4},
-  articleno = {1}, numpages = {16}, location = {San Diego, California}
-}
-
-@article{symbolic-execution, author = {King, James C.}, title = {Symbolic Execution and Program Testing}, year = {1976}, issue_date = {July 1976}, publisher = {Association for Computing Machinery}, address = {New York, NY, USA}, volume = {19}, number = {7}, issn = {0001-0782}, url = {https://doi.org/10.1145/360248.360252}, doi = {10.1145/360248.360252}, journal = {Commun. ACM}, month = jul, pages = {385–394}, numpages = {10}, keywords = {program testing, symbolic execution, program debugging, program proving, program verification, symbolic interpretation} }
-
-@article{docker,
-  title={An introduction to Docker for reproducible research},
-  author={Boettiger, Carl},
-  journal={ACM SIGOPS Operating Systems Review},
-  volume={49},
-  number={1},
-  pages={71--79},
-  year={2015},
-  publisher={ACM New York, NY, USA}
-}
+\begin{document}
+  \hypersetup{pageanchor=false}
+  \maketitle
+  \input{abstract/abstract}
+  \clearpage
+  \hypersetup{pageanchor=true}
+  \tableofcontents
+  \clearpage
+  \input{introduction/introduction}
+  \input{background/background}
+  \input{algorithm/algorithm}
+  \input{implementation/implementation}
+  \input{evaluation/evaluation}
+  \input{futurework/futurework}
+  \input{conclusion/conclusion}
+  \include{bibliography}
+\end{document}
