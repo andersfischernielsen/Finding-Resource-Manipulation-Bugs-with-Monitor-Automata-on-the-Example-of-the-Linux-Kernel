@@ -6,4 +6,4 @@ The repository my thesis at the IT University of Copenhagen.
 
 The thesis is available as a [PDF](report.pdf) in this repository. 
 
-The implementation of the thesis can be found at [andersfischernielsen/eba](https://github.com/andersfischernielsen/eba).
+The implementation of the thesis can be found at [itu-square/eba](https://github.com/itu-square/eba).
